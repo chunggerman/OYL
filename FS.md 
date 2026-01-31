@@ -1,0 +1,368 @@
+# Functional Specification (FS)
+# OYL — Multi‑Tenant, Workspace‑Centric Enterprise AI Platform
+
+This Functional Specification defines *how the OYL platform behaves* from a functional perspective.
+It translates product requirements (PRS) into detailed, testable functional behaviors.
+
+---
+
+# 1. System Architecture Overview
+
+OYL is composed of the following functional layers:
+
+1. **Tenant Layer** — isolation, metadata, security
+2. **Workspace Layer** — domain partitioning
+3. **Assistant Layer** — configuration of AI behavior
+4. **Reference Layer** — documents, chunks, embeddings, tags
+5. **Data Source Layer** — structured data ingestion and SQL execution
+6. **Integration Layer** — REST and SQL connectors
+7. **Workflow Layer** — multi‑step orchestration
+8. **Teammate Role Layer** — assistants acting as workflow participants
+9. **Security Layer** — encryption, isolation, sanitization
+10. **Frontend Layer** — Next.js/React UI
+
+Each layer exposes deterministic, validated, and auditable behavior.
+
+---
+
+# 2. Tenant Functionality
+
+## 2.1 Create Tenant
+- System generates unique tenant ID.
+- System initializes encrypted metadata.
+- System creates default workspace (optional).
+
+## 2.2 Retrieve Tenant
+- System returns tenant metadata.
+- System enforces isolation: only tenant‑scoped data is returned.
+
+## 2.3 Update Tenant
+- System validates fields.
+- System encrypts sensitive fields.
+
+## 2.4 Delete Tenant
+- System soft‑deletes tenant.
+- System cascades deletion to workspaces and objects.
+
+## 2.5 Tenant Isolation Rules
+- No cross‑tenant access to:
+  - Assistants
+  - References
+  - Data sources
+  - Integrations
+  - Workflows
+  - Logs
+- All API calls must include tenant context.
+
+---
+
+# 3. Workspace Functionality
+
+## 3.1 Create Workspace
+- System validates name uniqueness within tenant.
+- System initializes workspace containers.
+
+## 3.2 Retrieve Workspace
+- System returns workspace metadata and linked objects.
+
+## 3.3 Update Workspace
+- System validates updates.
+
+## 3.4 Delete Workspace
+- System soft‑deletes workspace.
+- System cascades deletion to assistants, references, data sources, integrations, workflows.
+
+## 3.5 Workspace Isolation Rules
+- No cross‑workspace access unless explicitly configured.
+- All operations require workspace context.
+
+---
+
+# 4. Assistant Functionality
+
+## 4.1 Create Assistant
+- System validates:
+  - Name
+  - Instruction
+  - Workspace context
+- System generates AI‑refined instruction.
+- System stores assistant configuration.
+
+## 4.2 Retrieve Assistant
+- System returns:
+  - Name
+  - Description
+  - Instruction
+  - AI‑refined instruction
+  - Settings
+  - Linked references, data sources, integrations
+
+## 4.3 Update Assistant
+- System validates updates.
+- System regenerates AI‑refined instruction if instruction changes.
+
+## 4.4 Delete Assistant
+- System soft‑deletes assistant.
+- System removes assistant from workflows.
+
+## 4.5 Assistant Behavior
+Assistants do not execute logic directly.
+They configure platform capabilities:
+- Ask for Reference
+- Ask for Data
+- Integrations
+- Workflow steps
+
+## 4.6 Assistant as Teammate
+Inside workflows:
+- Assistant is assigned a role.
+- Assistant receives step‑level instructions.
+- Assistant executes capability engines.
+
+Teammate is a **role**, not a separate entity.
+
+---
+
+# 5. Reference & Document Functionality
+
+## 5.1 Create Reference
+- System validates name.
+- System initializes empty reference container.
+
+## 5.2 Upload Document
+- System validates file type and size.
+- System extracts:
+  - Raw text
+  - Metadata
+- System performs deterministic chunking.
+- System generates embeddings for each chunk.
+- System generates AI tags.
+
+## 5.3 Retrieve Reference
+- System returns:
+  - Reference metadata
+  - Documents
+  - Chunks
+  - Tags
+
+## 5.4 Update Reference
+- System validates updates.
+
+## 5.5 Delete Reference
+- System soft‑deletes reference and all documents.
+
+---
+
+# 6. Chunking Functionality
+
+## 6.1 Deterministic Chunking
+Given identical text and configuration:
+- Chunk boundaries must be identical.
+- Chunk count must be identical.
+- Chunk text must be identical.
+
+## 6.2 Chunk Metadata
+Each chunk includes:
+- Position index
+- Text
+- Embedding vector
+- Tags
+
+## 6.3 Chunk Storage
+- Stored in workspace‑scoped storage.
+- Linked to document and reference.
+
+---
+
+# 7. Tagging Functionality
+
+## 7.1 Manual Tags
+- Builder may add tags to references or chunks.
+
+## 7.2 AI Tags
+- System generates tags during document ingestion.
+
+## 7.3 Tag Merge Logic
+- Deduplicate tags.
+- Normalize casing.
+- Merge manual + AI tags.
+
+---
+
+# 8. Embedding Functionality
+
+## 8.1 Embedding Generation
+- System generates embeddings for each chunk.
+- Embeddings must be deterministic for identical text.
+
+## 8.2 Embedding Storage
+- Stored in vector database.
+- Linked to chunk ID.
+
+---
+
+# 9. Ask for Reference (RAG)
+
+## 9.1 Query Processing
+- System interprets user query.
+- System retrieves relevant chunks using:
+  - Embedding similarity
+  - Tag filtering
+  - Ranking
+
+## 9.2 Result Merging
+- System merges overlapping or adjacent chunks.
+- System ranks results deterministically.
+
+## 9.3 Summary Generation
+- System generates summary using LLM.
+
+## 9.4 Output Format
+- Relevant chunks
+- Excerpts
+- Summary
+- Source references
+
+---
+
+# 10. Data Source Functionality
+
+## 10.1 Upload Data Source
+- System validates CSV/XLSX.
+- System extracts:
+  - Schema
+  - Rows
+- System normalizes data.
+
+## 10.2 Retrieve Data Source
+- System returns schema and metadata.
+
+## 10.3 Ask for Data
+- System interprets natural‑language question.
+- System generates SQL.
+- System validates SQL:
+  - Column existence
+  - Type safety
+  - Injection prevention
+- System executes SQL.
+- System returns rows + summary.
+
+---
+
+# 11. Integration Functionality
+
+## 11.1 Create Integration Config
+- System validates:
+  - Endpoint
+  - Method
+  - Headers
+  - Authentication
+- System encrypts sensitive fields.
+
+## 11.2 Execute Integration
+- System validates request.
+- System executes:
+  - HTTPS REST call
+  - or SQL query
+- System handles:
+  - Retries
+  - Timeouts
+  - Errors
+- System sanitizes logs.
+
+---
+
+# 12. Workflow Functionality
+
+## 12.1 Create Workflow
+- System validates name.
+- System initializes empty step list.
+
+## 12.2 Add Steps
+Steps may include:
+- Ask for Reference
+- Ask for Data
+- Integration
+- Human‑in‑loop
+
+## 12.3 Assign Assistants (Teammate Mode)
+- Builder manually selects assistants
+- or AI recommends assistants
+- Human must confirm AI recommendations
+
+## 12.4 Execute Workflow
+- System executes steps sequentially.
+- System passes outputs between steps.
+- System pauses for human‑in‑loop steps.
+- System logs all actions.
+
+## 12.5 Workflow Errors
+- System stops execution.
+- System notifies builder.
+- Builder may retry or modify workflow.
+
+---
+
+# 13. Security Functionality
+
+## 13.1 Encryption
+- TDE for storage
+- AES‑256 for sensitive fields
+- TLS 1.3 for all communication
+
+## 13.2 Isolation
+- Tenant isolation
+- Workspace scoping
+
+## 13.3 Logging
+- Logs must be sanitized
+- No sensitive data in logs
+
+---
+
+# 14. Frontend Functionality
+
+## 14.1 Workspace Navigation
+- List workspaces
+- Switch workspaces
+
+## 14.2 Assistant UI
+- Create/edit/delete assistants
+- View linked references, data sources, integrations
+
+## 14.3 Reference UI
+- Upload documents
+- View chunks, tags, embeddings
+
+## 14.4 Data Source UI
+- Upload CSV/XLSX
+- View schema and rows
+
+## 14.5 Integration UI
+- Configure REST/SQL integrations
+
+## 14.6 Workflow Builder
+- Add steps
+- Assign assistants
+- Review AI recommendations
+- Execute workflows
+
+## 14.7 Chat Interface
+- Interact with assistants
+- Ask for Reference
+- Ask for Data
+
+---
+
+# 15. Non‑Functional Functional Behaviors
+
+## 15.1 Determinism
+- Chunking
+- Embeddings
+- Retrieval ranking
+
+## 15.2 Performance
+- Defined thresholds for chunking, search, SQL
+
+## 15.3 Auditability
+- All actions logged with timestamps and user IDs
