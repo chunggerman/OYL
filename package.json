@@ -1,0 +1,31 @@
+{
+  "name": "oyl",
+  "version": "1.0.0",
+  "description": "OYL multi-tenant AI platform backend",
+  "main": "backend/src/server.ts",
+  "type": "commonjs",
+  "scripts": {
+    "migrate": "ts-node scripts/run-migrations.ts",
+    "test": "jest",
+    "dev": "ts-node backend/src/server.ts",
+    "build": "tsc",
+    "start": "node dist/backend/src/server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "express": "^5.2.1",
+    "pg": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^25.1.0",
+    "@types/pg": "^8.16.0",
+    "@types/supertest": "^6.0.3",
+    "jest": "^29.7.0",
+    "supertest": "^7.2.2",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
