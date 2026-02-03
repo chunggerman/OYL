@@ -1,18 +1,47 @@
-import express from "express";
+import { Request, Response } from "express";
 import { EmbeddingService } from "../services/EmbeddingService";
-import { PostgresEmbeddingRepository } from "../domain/repositories/PostgresEmbeddingRepository";
 
-const router = express.Router();
-const service = new EmbeddingService(new PostgresEmbeddingRepository());
+export class EmbeddingController {
+  private service: EmbeddingService;
 
-router.get("/:id", async (req, res, next) => {
-  try {
-    const embedding = await service.getEmbedding(req.params.id);
-    if (!embedding) return res.status(404).json({ message: "Not found" });
-    res.json(embedding);
-  } catch (err) {
-    next(err);
+  constructor() {
+    this.service = new EmbeddingService();
   }
-});
 
-export default router;
+  listByChunk = async (req: Request, res: Response) => {
+    const { chunkId, workspaceId } = req.params;
+    const embeddings = await this.service.listByChunk(chunkId, workspaceId);
+    res.json(embeddings);
+  };
+
+  get = async (req: Request, res: Response) => {
+    const { id, workspaceId } = req.params;
+    const embedding = await this.service.get(id, workspaceId);
+
+    if (!embedding) {
+      return res.status(404).json({ error: "Embedding not found" });
+    }
+
+    res.json(embedding);
+  };
+
+  create = async (req: Request, res: Response) => {
+    const { chunkId, workspaceId } = req.params;
+    const { vector } = req.body;
+
+    const embedding = await this.service.create(
+      workspaceId,
+      chunkId,
+      vector
+    );
+
+    res.status(201).json(embedding);
+  };
+
+  delete = async (req: Request, res: Response) => {
+    const { id, workspaceId } = req.params;
+
+    await this.service.delete(id, workspaceId);
+    res.status(204).send();
+  };
+}

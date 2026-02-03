@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { getSemanticTagsByChunk, searchSemanticTags } from "../semanticTagsController";
+import {
+  getSemanticTagsByChunk,
+  searchSemanticTags,
+} from "../semanticTagsController";
 
 const router = Router();
 

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { ingestFileAsImages } from "../../services/ingestion/ingestFileAsImages";
+import { ingestFileAsImages } from "../services/ingestion/ingestFileAsImages";
 
 const router = Router();
 

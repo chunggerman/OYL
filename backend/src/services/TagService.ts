@@ -1,18 +1,42 @@
-import { TagRepository } from "../domain/repositories/TagRepository";
-import { Tag } from "../domain/entities/Tag";
+import { PostgresTagRepository } from "../repositories/PostgresTagRepository";
+import { PostgresDocumentTagRepository } from "../repositories/PostgresDocumentTagRepository";
 
 export class TagService {
-  constructor(private readonly repo: TagRepository) {}
+  private repo: PostgresTagRepository;
+  private documentTagRepo: PostgresDocumentTagRepository;
 
-  async getTag(id: string): Promise<Tag | null> {
-    return this.repo.findById(id);
+  constructor() {
+    this.repo = new PostgresTagRepository();
+    this.documentTagRepo = new PostgresDocumentTagRepository();
   }
 
-  async getByReference(referenceId: string): Promise<Tag[]> {
-    return this.repo.findByReference(referenceId);
+  async list(workspaceId: string) {
+    return this.repo.listByWorkspace(workspaceId);
   }
 
-  async createTag(tag: Tag): Promise<void> {
-    await this.repo.create(tag);
+  async get(id: string, workspaceId: string) {
+    return this.repo.getById(id, workspaceId);
+  }
+
+  async create(
+    workspaceId: string,
+    name: string,
+    color: string | null
+  ) {
+    return this.repo.create(workspaceId, name, color);
+  }
+
+  async update(
+    id: string,
+    workspaceId: string,
+    name: string,
+    color: string | null
+  ) {
+    return this.repo.update(id, workspaceId, name, color);
+  }
+
+  async delete(id: string, workspaceId: string) {
+    await this.documentTagRepo.deleteByTag(id, workspaceId);
+    await this.repo.delete(id, workspaceId);
   }
 }

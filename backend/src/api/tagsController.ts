@@ -1,18 +1,66 @@
-import express from "express";
+import { Request, Response } from "express";
 import { TagService } from "../services/TagService";
-import { PostgresTagRepository } from "../domain/repositories/PostgresTagRepository";
 
-const router = express.Router();
-const service = new TagService(new PostgresTagRepository());
+export class TagController {
+  private service: TagService;
 
-router.get("/:id", async (req, res, next) => {
-  try {
-    const tag = await service.getTag(req.params.id);
-    if (!tag) return res.status(404).json({ message: "Not found" });
-    res.json(tag);
-  } catch (err) {
-    next(err);
+  constructor() {
+    this.service = new TagService();
   }
-});
 
-export default router;
+  listByChunk = async (req: Request, res: Response) => {
+    const { chunkId, workspaceId } = req.params;
+    const tags = await this.service.listByChunk(chunkId, workspaceId);
+    res.json(tags);
+  };
+
+  get = async (req: Request, res: Response) => {
+    const { id, workspaceId } = req.params;
+    const tag = await this.service.get(id, workspaceId);
+
+    if (!tag) {
+      return res.status(404).json({ error: "Tag not found" });
+    }
+
+    res.json(tag);
+  };
+
+  create = async (req: Request, res: Response) => {
+    const { chunkId, workspaceId } = req.params;
+    const { name, confidence } = req.body;
+
+    const tag = await this.service.create(
+      workspaceId,
+      chunkId,
+      name,
+      confidence
+    );
+
+    res.status(201).json(tag);
+  };
+
+  update = async (req: Request, res: Response) => {
+    const { id, workspaceId } = req.params;
+    const { name, confidence } = req.body;
+
+    const tag = await this.service.update(
+      id,
+      workspaceId,
+      name,
+      confidence
+    );
+
+    if (!tag) {
+      return res.status(404).json({ error: "Tag not found" });
+    }
+
+    res.json(tag);
+  };
+
+  delete = async (req: Request, res: Response) => {
+    const { id, workspaceId } = req.params;
+
+    await this.service.delete(id, workspaceId);
+    res.status(204).send();
+  };
+}

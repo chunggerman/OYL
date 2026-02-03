@@ -1,18 +1,38 @@
-import { WorkspaceRepository } from "../domain/repositories/WorkspaceRepository";
-import { Workspace } from "../domain/entities/Workspace";
+import { PostgresWorkspaceRepository } from "../repositories/PostgresWorkspaceRepository";
 
 export class WorkspaceService {
-  constructor(private readonly repo: WorkspaceRepository) {}
+  private repo: PostgresWorkspaceRepository;
 
-  async getWorkspace(id: string): Promise<Workspace | null> {
-    return this.repo.findById(id);
+  constructor() {
+    this.repo = new PostgresWorkspaceRepository();
   }
 
-  async getByTenant(tenantId: string): Promise<Workspace[]> {
-    return this.repo.findByTenant(tenantId);
+  async list(tenantId: string) {
+    return this.repo.listByTenant(tenantId);
   }
 
-  async createWorkspace(workspace: Workspace): Promise<void> {
-    await this.repo.create(workspace);
+  async get(id: string, tenantId: string) {
+    return this.repo.getById(id, tenantId);
+  }
+
+  async create(
+    tenantId: string,
+    name: string,
+    description: string | null
+  ) {
+    return this.repo.create(tenantId, name, description);
+  }
+
+  async update(
+    id: string,
+    tenantId: string,
+    name: string,
+    description: string | null
+  ) {
+    return this.repo.update(id, tenantId, name, description);
+  }
+
+  async delete(id: string, tenantId: string) {
+    await this.repo.delete(id, tenantId);
   }
 }

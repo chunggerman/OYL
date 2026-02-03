@@ -1,68 +1,40 @@
-import { db } from "../../db";
-import { Document } from "../entities/Document";
-import { DocumentRepository } from "./DocumentRepository";
+import { pool } from "../../db";
 
-export class PostgresDocumentRepository implements DocumentRepository {
-  async findById(id: string): Promise<Document | null> {
-    const result = await db.query(
-      `SELECT id, reference_id, filename, mime_type, size_bytes, metadata_json, text, created_at, updated_at, deleted_at
-       FROM documents
-       WHERE id = $1`,
-      [id]
+export class PostgresDocumentRepository {
+  async getById(id: string, workspaceId: string) {
+    const result = await pool.query(
+      `SELECT * FROM documents
+       WHERE id = $1 AND workspace_id = $2`,
+      [id, workspaceId]
     );
-    if (result.rowCount === 0) return null;
-    const row = result.rows[0];
-    return {
-      id: row.id,
-      referenceId: row.reference_id,
-      filename: row.filename,
-      mimeType: row.mime_type,
-      sizeBytes: row.size_bytes,
-      metadataJson: row.metadata_json,
-      text: row.text,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      deletedAt: row.deleted_at,
-    };
+    return result.rows[0];
   }
 
-  async findByReference(referenceId: string): Promise<Document[]> {
-    const result = await db.query(
-      `SELECT id, reference_id, filename, mime_type, size_bytes, metadata_json, text, created_at, updated_at, deleted_at
-       FROM documents
-       WHERE reference_id = $1 AND deleted_at IS NULL`,
-      [referenceId]
+  async list(workspaceId: string) {
+    const result = await pool.query(
+      `SELECT * FROM documents
+       WHERE workspace_id = $1
+       ORDER BY created_at DESC`,
+      [workspaceId]
     );
-    return result.rows.map((row) => ({
-      id: row.id,
-      referenceId: row.reference_id,
-      filename: row.filename,
-      mimeType: row.mime_type,
-      sizeBytes: row.size_bytes,
-      metadataJson: row.metadata_json,
-      text: row.text,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      deletedAt: row.deleted_at,
-    }));
+    return result.rows;
   }
 
-  async create(doc: Document): Promise<void> {
-    await db.query(
-      `INSERT INTO documents (id, reference_id, filename, mime_type, size_bytes, metadata_json, text, created_at, updated_at, deleted_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-      [
-        doc.id,
-        doc.referenceId,
-        doc.filename,
-        doc.mimeType,
-        doc.sizeBytes,
-        doc.metadataJson,
-        doc.text,
-        doc.createdAt,
-        doc.updatedAt,
-        doc.deletedAt,
-      ]
+  async create(workspaceId: string, title: string) {
+    const result = await pool.query(
+      `INSERT INTO documents (workspace_id, title)
+       VALUES ($1, $2)
+       RETURNING *`,
+      [workspaceId, title]
+    );
+    return result.rows[0];
+  }
+
+  async delete(id: string, workspaceId: string) {
+    await pool.query(
+      `DELETE FROM documents
+       WHERE id = $1 AND workspace_id = $2`,
+      [id, workspaceId]
     );
   }
 }

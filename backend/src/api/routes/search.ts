@@ -1,16 +1,37 @@
-
-import express from "express";
-import { Pool } from "pg";
+import { Router } from "express";
 import { search } from "../../search/search";
+import { ragQuery } from "../../services/rag/ragService";
+import { ragQuerySchema } from "../../validation/ragSchemas";
 
-const router = express.Router();
-const db = new Pool({ connectionString: process.env.DATABASE_URL });
+const router = Router();
 
+// Basic search route (kept minimal, same import path as before)
 router.post("/", async (req, res) => {
-  const { workspaceId, embedding, filters } = req.body;
+  try {
+    const result = await search(req.body);
+    res.json(result);
+  } catch (err) {
+    console.error("search route error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
-  const result = await search(db, workspaceId, embedding, filters || {});
-  res.json(result);
+// RAG route with validation (Step 3)
+router.post("/rag", async (req, res) => {
+  const parsed = ragQuerySchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json(parsed.error);
+  }
+
+  const { workspaceId, query } = parsed.data;
+
+  try {
+    const result = await ragQuery(workspaceId, query);
+    res.json(result);
+  } catch (err) {
+    console.error("rag route error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 export default router;

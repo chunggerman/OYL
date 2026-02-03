@@ -12,7 +12,7 @@ export async function extractTagsFromText(
     {
       role: "system",
       content:
-        "Extract short semantic tags from the text. Return ONLY a JSON array of strings. No explanations."
+        "Extract short semantic tags from the text. Return ONLY a JSON array of strings."
     },
     {
       role: "user",

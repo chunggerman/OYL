@@ -1,65 +1,66 @@
-import { db } from "../../db";
-import { Assistant } from "../entities/Assistant";
-import { AssistantRepository } from "./AssistantRepository";
+import { pool } from "../../db";
 
-export class PostgresAssistantRepository implements AssistantRepository {
-  async findById(id: string): Promise<Assistant | null> {
-    const result = await db.query(
-      `SELECT id, workspace_id, name, instruction, ai_instruction, settings_json, created_at, updated_at, deleted_at
+export class PostgresAssistantRepository {
+  async listByWorkspace(workspaceId: string) {
+    const result = await pool.query(
+      `SELECT *
        FROM assistants
-       WHERE id = $1`,
-      [id]
-    );
-    if (result.rowCount === 0) return null;
-    const row = result.rows[0];
-    return {
-      id: row.id,
-      workspaceId: row.workspace_id,
-      name: row.name,
-      instruction: row.instruction,
-      aiInstruction: row.ai_instruction,
-      settingsJson: row.settings_json,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      deletedAt: row.deleted_at,
-    };
-  }
-
-  async findByWorkspace(workspaceId: string): Promise<Assistant[]> {
-    const result = await db.query(
-      `SELECT id, workspace_id, name, instruction, ai_instruction, settings_json, created_at, updated_at, deleted_at
-       FROM assistants
-       WHERE workspace_id = $1 AND deleted_at IS NULL`,
+       WHERE workspace_id = $1
+       ORDER BY created_at DESC`,
       [workspaceId]
     );
-    return result.rows.map((row) => ({
-      id: row.id,
-      workspaceId: row.workspace_id,
-      name: row.name,
-      instruction: row.instruction,
-      aiInstruction: row.ai_instruction,
-      settingsJson: row.settings_json,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      deletedAt: row.deleted_at,
-    }));
+    return result.rows;
   }
 
-  async create(assistant: Assistant): Promise<void> {
-    await db.query(
-      `INSERT INTO assistants (id, workspace_id, name, instruction, ai_instruction, settings_json, created_at, updated_at, deleted_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [
-        assistant.id,
-        assistant.workspaceId,
-        assistant.name,
-        assistant.instruction,
-        assistant.aiInstruction,
-        assistant.settingsJson,
-        assistant.createdAt,
-        assistant.updatedAt,
-        assistant.deletedAt,
-      ]
+  async getById(id: string, workspaceId: string) {
+    const result = await pool.query(
+      `SELECT *
+       FROM assistants
+       WHERE id = $1
+         AND workspace_id = $2`,
+      [id, workspaceId]
+    );
+    return result.rows[0];
+  }
+
+  async create(
+    workspaceId: string,
+    name: string,
+    description: string | null
+  ) {
+    const result = await pool.query(
+      `INSERT INTO assistants (workspace_id, name, description)
+       VALUES ($1, $2, $3)
+       RETURNING *`,
+      [workspaceId, name, description]
+    );
+    return result.rows[0];
+  }
+
+  async update(
+    id: string,
+    workspaceId: string,
+    name: string,
+    description: string | null
+  ) {
+    const result = await pool.query(
+      `UPDATE assistants
+       SET name = $3,
+           description = $4
+       WHERE id = $1
+         AND workspace_id = $2
+       RETURNING *`,
+      [id, workspaceId, name, description]
+    );
+    return result.rows[0];
+  }
+
+  async delete(id: string, workspaceId: string) {
+    await pool.query(
+      `DELETE FROM assistants
+       WHERE id = $1
+         AND workspace_id = $2`,
+      [id, workspaceId]
     );
   }
 }

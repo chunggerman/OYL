@@ -1,118 +1,80 @@
 import { pool } from "../../db";
-import { generateEmbeddingById } from "../../providers/embeddings";
-import { embeddingProviders } from "../../providers/registry/embeddings";
-import { generateAnswerFromContext } from "./llmService";
+import { embedText } from "./embeddingService";
+import { callLlmById } from "../llmService";
 
-async function getWorkspaceEmbeddingProvider(workspaceId: string): Promise<string> {
-  const res = await pool.query(
-    `SELECT embedding_provider
-     FROM workspace_settings
-     WHERE workspace_id = $1`,
-    [workspaceId]
-  );
-  const row = res.rows[0];
-  if (row?.embedding_provider) return row.embedding_provider;
-  return embeddingProviders[0].id;
-}
+export async function ragQuery(workspaceId: string, query: string) {
+  const queryEmbedding = await embedText(query);
 
-async function semanticSearch(
-  workspaceId: string,
-  query: string,
-  limit: number
-) {
-  const providerId = await getWorkspaceEmbeddingProvider(workspaceId);
-  const queryVector = await generateEmbeddingById(providerId, query);
-
-  const { rows } = await pool.query(
+  // 1. Embedding search
+  const embeddingResults = await pool.query(
     `
-    SELECT c.id as chunk_id,
-           c.text,
-           1 - (e.vector <=> $1::vector) AS score
-    FROM embeddings e
-    JOIN chunks c ON c.id = e.chunk_id
+    SELECT
+      c.id AS chunk_id,
+      c.text,
+      (embeddings.embedding <=> $1) AS distance
+    FROM embeddings
+    JOIN chunks c ON c.id = embeddings.chunk_id
     WHERE c.workspace_id = $2
-    ORDER BY e.vector <=> $1::vector
-    LIMIT $3
+    ORDER BY embeddings.embedding <=> $1
+    LIMIT 8
     `,
-    [queryVector, workspaceId, limit]
+    [queryEmbedding, workspaceId]
   );
 
-  return rows;
-}
-
-async function tagSearch(
-  workspaceId: string,
-  tags: string[],
-  limit: number
-) {
-  if (!tags.length) return [];
-
-  const { rows } = await pool.query(
+  // 2. Semantic tag search
+  const tagResults = await pool.query(
     `
-    SELECT c.id as chunk_id,
-           c.text,
-           MAX(t.confidence) AS score
+    SELECT
+      c.id AS chunk_id,
+      c.text,
+      0.25 AS distance
     FROM chunk_tags t
     JOIN chunks c ON c.id = t.chunk_id
     WHERE c.workspace_id = $1
-      AND t.tag = ANY($2::text[])
-    GROUP BY c.id, c.text
-    ORDER BY score DESC
-    LIMIT $3
+      AND t.tag ILIKE ANY (ARRAY[
+        '%' || $2 || '%'
+      ])
+    LIMIT 8
     `,
-    [workspaceId, tags, limit]
+    [workspaceId, query]
   );
 
-  return rows;
-}
+  // 3. Merge + dedupe
+  const map = new Map();
 
-export async function answerWithRag(
-  workspaceId: string,
-  question: string,
-  options?: { tags?: string[]; semanticLimit?: number; tagLimit?: number }
-): Promise<string> {
-  const semanticLimit = options?.semanticLimit ?? 8;
-  const tagLimit = options?.tagLimit ?? 8;
-  const tags = options?.tags ?? [];
-
-  const [semanticResults, tagResults] = await Promise.all([
-    semanticSearch(workspaceId, question, semanticLimit),
-    tagSearch(workspaceId, tags, tagLimit)
-  ]);
-
-  const mergedMap = new Map<string, { text: string; score: number; tags: string[] }>();
-
-  for (const row of semanticResults) {
-    mergedMap.set(row.chunk_id, {
-      text: row.text,
-      score: Number(row.score),
-      tags: []
-    });
+  for (const row of embeddingResults.rows) {
+    map.set(row.chunk_id, row);
   }
 
-  if (tags.length) {
-    for (const row of tagResults) {
-      const existing = mergedMap.get(row.chunk_id);
-      if (existing) {
-        existing.score = Math.max(existing.score, Number(row.score));
-        existing.tags = Array.from(new Set([...(existing.tags || []), ...tags]));
-      } else {
-        mergedMap.set(row.chunk_id, {
-          text: row.text,
-          score: Number(row.score),
-          tags: [...tags]
-        });
-      }
+  for (const row of tagResults.rows) {
+    if (!map.has(row.chunk_id)) {
+      map.set(row.chunk_id, row);
     }
   }
 
-  const merged = Array.from(mergedMap.values())
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 10);
+  const merged = Array.from(map.values())
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 8);
 
-  return await generateAnswerFromContext(
-    workspaceId,
-    question,
-    merged.map(m => ({ text: m.text, tags: m.tags }))
-  );
+  // 4. Build context
+  const context = merged.map(r => r.text).join("\n\n");
+
+  // 5. LLM answer
+  const messages = [
+    {
+      role: "system",
+      content: "Answer using ONLY the provided context."
+    },
+    {
+      role: "user",
+      content: `Context:\n${context}\n\nQuestion: ${query}`
+    }
+  ];
+
+  const answer = await callLlmById("qwen2.5-14b", messages);
+
+  return {
+    answer,
+    chunks: merged
+  };
 }

@@ -1,18 +1,33 @@
-import { TenantRepository } from "../domain/repositories/TenantRepository";
-import { Tenant } from "../domain/entities/Tenant";
+import { PostgresTenantRepository } from "../repositories/PostgresTenantRepository";
 
 export class TenantService {
-  constructor(private readonly repo: TenantRepository) {}
+  private repo: PostgresTenantRepository;
 
-  async getTenant(id: string): Promise<Tenant | null> {
-    return this.repo.findById(id);
+  constructor() {
+    this.repo = new PostgresTenantRepository();
   }
 
-  async getMany(ids: string[]): Promise<Tenant[]> {
-    return this.repo.findManyByIds(ids);
+  async list() {
+    return this.repo.list();
   }
 
-  async createTenant(tenant: Tenant): Promise<void> {
-    await this.repo.create(tenant);
+  async get(id: string) {
+    return this.repo.getById(id);
+  }
+
+  async getByDomain(domain: string) {
+    return this.repo.getByDomain(domain);
+  }
+
+  async create(name: string, domain: string | null) {
+    return this.repo.create(name, domain);
+  }
+
+  async update(id: string, name: string, domain: string | null) {
+    return this.repo.update(id, name, domain);
+  }
+
+  async delete(id: string) {
+    await this.repo.delete(id);
   }
 }

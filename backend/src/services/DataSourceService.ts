@@ -1,18 +1,38 @@
-import { DataSourceRepository } from "../domain/repositories/DataSourceRepository";
-import { DataSource } from "../domain/entities/DataSource";
+import { PostgresDataSourceRepository } from "../repositories/PostgresDataSourceRepository";
 
 export class DataSourceService {
-  constructor(private readonly repo: DataSourceRepository) {}
+  private repo: PostgresDataSourceRepository;
 
-  async getDataSource(id: string): Promise<DataSource | null> {
-    return this.repo.findById(id);
+  constructor() {
+    this.repo = new PostgresDataSourceRepository();
   }
 
-  async getByWorkspace(workspaceId: string): Promise<DataSource[]> {
-    return this.repo.findByWorkspace(workspaceId);
+  async list(workspaceId: string) {
+    return this.repo.listByWorkspace(workspaceId);
   }
 
-  async createDataSource(dataSource: DataSource): Promise<void> {
-    await this.repo.create(dataSource);
+  async get(id: string, workspaceId: string) {
+    return this.repo.getById(id, workspaceId);
+  }
+
+  async create(
+    workspaceId: string,
+    type: string,
+    config: any
+  ) {
+    return this.repo.create(workspaceId, type, config);
+  }
+
+  async update(
+    id: string,
+    workspaceId: string,
+    type: string,
+    config: any
+  ) {
+    return this.repo.update(id, workspaceId, type, config);
+  }
+
+  async delete(id: string, workspaceId: string) {
+    await this.repo.delete(id, workspaceId);
   }
 }

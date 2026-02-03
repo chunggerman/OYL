@@ -1,0 +1,116 @@
+diff --git a/backend/src/tags/createTag.ts b/backend/src/tags/manual/createTag.ts
+similarity index 100%
+rename from backend/src/tags/createTag.ts
+rename to backend/src/tags/manual/createTag.ts
+diff --git a/backend/src/tags/linkTag.ts b/backend/src/tags/manual/linkTag.ts
+similarity index 100%
+rename from backend/src/tags/linkTag.ts
+rename to backend/src/tags/manual/linkTag.ts
+diff --git a/backend/src/tags/listTags.ts b/backend/src/tags/manual/listTags.ts
+similarity index 100%
+rename from backend/src/tags/listTags.ts
+rename to backend/src/tags/manual/listTags.ts
+diff --git a/backend/src/tags/listTaggedDocuments.ts b/backend/src/tags/manual/listTaggedDocuments.ts
+similarity index 100%
+rename from backend/src/tags/listTaggedDocuments.ts
+rename to backend/src/tags/manual/listTaggedDocuments.ts
+diff --git a/backend/src/tags/listTaggedReferences.ts b/backend/src/tags/manual/listTaggedReferences.ts
+similarity index 100%
+rename from backend/src/tags/listTaggedReferences.ts
+rename to backend/src/tags/manual/listTaggedReferences.ts
+
+diff --git a/backend/src/api/routes/tags.ts b/backend/src/api/routes/tags.ts
+index 1111111..2222222 100644
+--- a/backend/src/api/routes/tags.ts
++++ b/backend/src/api/routes/tags.ts
+@@ -1,7 +1,7 @@
+ import { Router } from "express";
+-import { createTag } from "../../tags/createTag";
+-import { listTags } from "../../tags/listTags";
++import { createTag } from "../../tags/manual/createTag";
++import { listTags } from "../../tags/manual/listTags";
+
+ const router = Router();
+
+diff --git a/backend/src/tags/ai/taggingService.ts b/backend/src/tags/ai/taggingService.ts
+new file mode 100644
+index 0000000..3333333
+--- /dev/null
++++ b/backend/src/tags/ai/taggingService.ts
+@@ -0,0 +1,95 @@
++import { pool } from "../../db";
++import { callLlmById } from "../../providers/llms";
++
++export async function extractTagsFromText(
++  workspaceId: string,
++  chunkId: string,
++  text: string
++): Promise<string[]> {
++  const providerId = "qwen2.5-14b";
++
++  const messages = [
++    {
++      role: "system",
++      content:
++        "Extract short semantic tags from the text. Return ONLY a JSON array of strings."
++    },
++    {
++      role: "user",
++      content: `Text:\n${text}\n\nReturn JSON array only.`
++    }
++  ];
++
++  const raw = await callLlmById(providerId, messages);
++
++  try {
++    const parsed = JSON.parse(raw);
++    if (Array.isArray(parsed)) return parsed.map(t => String(t));
++  } catch (err) {
++    console.error("Failed to parse tags:", raw);
++  }
++
++  return [];
++}
++
++export async function saveChunkTags(
++  chunkId: string,
++  tags: string[]
++): Promise<void> {
++  if (!tags.length) return;
++
++  const client = await pool.connect();
++  try {
++    await client.query("BEGIN");
++
++    await client.query(
++      `DELETE FROM chunk_tags WHERE chunk_id = $1`,
++      [chunkId]
++    );
++
++    for (const tag of tags) {
++      await client.query(
++        `
++        INSERT INTO chunk_tags (chunk_id, tag, confidence)
++        VALUES ($1, $2, 1.0)
++        `,
++        [chunkId, tag]
++      );
++    }
++
++    await client.query("COMMIT");
++  } catch (err) {
++    await client.query("ROLLBACK");
++    throw err;
++  } finally {
++    client.release();
++  }
++}
+
+diff --git a/backend/src/services/ingestion/ingestFileAsImages.ts b/backend/src/services/ingestion/ingestFileAsImages.ts
+index 4444444..5555555 100644
+--- a/backend/src/services/ingestion/ingestFileAsImages.ts
++++ b/backend/src/services/ingestion/ingestFileAsImages.ts
+@@ -5,7 +5,7 @@ import { embedImagePage } from "../rag/embeddingService";
+ import { extractOcrTextLLM } from "./ocrService";
+-import { extractTagsFromText, saveChunkTags } from "../../tags/taggingService";
++import { extractTagsFromText, saveChunkTags } from "../../tags/ai/taggingService";

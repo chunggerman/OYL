@@ -1,66 +1,71 @@
-import { db } from "../../db";
-import { WorkflowStep } from "../entities/WorkflowStep";
-import { WorkflowStepRepository } from "./WorkflowStepRepository";
+import { pool } from "../../db";
 
-export class PostgresWorkflowStepRepository implements WorkflowStepRepository {
-  async findById(id: string): Promise<WorkflowStep | null> {
-    const result = await db.query(
-      `SELECT id, workflow_id, position, type_enum, assistant_id, instruction, config_json, created_at, deleted_at
+export class PostgresWorkflowStepRepository {
+  async listByWorkflow(workflowId: string, workspaceId: string) {
+    const result = await pool.query(
+      `SELECT *
        FROM workflow_steps
-       WHERE id = $1`,
-      [id]
-    );
-    if (result.rowCount === 0) return null;
-    const row = result.rows[0];
-    return {
-      id: row.id,
-      workflowId: row.workflow_id,
-      position: row.position,
-      typeEnum: row.type_enum,
-      assistantId: row.assistant_id,
-      instruction: row.instruction,
-      configJson: row.config_json,
-      createdAt: row.created_at,
-      deletedAt: row.deleted_at,
-    };
-  }
-
-  async findByWorkflow(workflowId: string): Promise<WorkflowStep[]> {
-    const result = await db.query(
-      `SELECT id, workflow_id, position, type_enum, assistant_id, instruction, config_json, created_at, deleted_at
-       FROM workflow_steps
-       WHERE workflow_id = $1 AND deleted_at IS NULL
+       WHERE workflow_id = $1
+         AND workspace_id = $2
        ORDER BY position ASC`,
-      [workflowId]
+      [workflowId, workspaceId]
     );
-    return result.rows.map((row) => ({
-      id: row.id,
-      workflowId: row.workflow_id,
-      position: row.position,
-      typeEnum: row.type_enum,
-      assistantId: row.assistant_id,
-      instruction: row.instruction,
-      configJson: row.config_json,
-      createdAt: row.created_at,
-      deletedAt: row.deleted_at,
-    }));
+    return result.rows;
   }
 
-  async create(step: WorkflowStep): Promise<void> {
-    await db.query(
-      `INSERT INTO workflow_steps (id, workflow_id, position, type_enum, assistant_id, instruction, config_json, created_at, deleted_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [
-        step.id,
-        step.workflowId,
-        step.position,
-        step.typeEnum,
-        step.assistantId,
-        step.instruction,
-        step.configJson,
-        step.createdAt,
-        step.deletedAt,
-      ]
+  async getById(id: string, workspaceId: string) {
+    const result = await pool.query(
+      `SELECT *
+       FROM workflow_steps
+       WHERE id = $1
+         AND workspace_id = $2`,
+      [id, workspaceId]
+    );
+    return result.rows[0];
+  }
+
+  async create(
+    workspaceId: string,
+    workflowId: string,
+    position: number,
+    type: string,
+    config: any
+  ) {
+    const result = await pool.query(
+      `INSERT INTO workflow_steps (workspace_id, workflow_id, position, type, config)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING *`,
+      [workspaceId, workflowId, position, type, config]
+    );
+    return result.rows[0];
+  }
+
+  async update(
+    id: string,
+    workspaceId: string,
+    position: number,
+    type: string,
+    config: any
+  ) {
+    const result = await pool.query(
+      `UPDATE workflow_steps
+       SET position = $3,
+           type = $4,
+           config = $5
+       WHERE id = $1
+         AND workspace_id = $2
+       RETURNING *`,
+      [id, workspaceId, position, type, config]
+    );
+    return result.rows[0];
+  }
+
+  async delete(id: string, workspaceId: string) {
+    await pool.query(
+      `DELETE FROM workflow_steps
+       WHERE id = $1
+         AND workspace_id = $2`,
+      [id, workspaceId]
     );
   }
 }

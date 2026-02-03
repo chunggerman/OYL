@@ -1,18 +1,66 @@
-import express from "express";
+import { Request, Response } from "express";
 import { ChunkService } from "../services/ChunkService";
-import { PostgresChunkRepository } from "../domain/repositories/PostgresChunkRepository";
 
-const router = express.Router();
-const service = new ChunkService(new PostgresChunkRepository());
+export class ChunkController {
+  private service: ChunkService;
 
-router.get("/:id", async (req, res, next) => {
-  try {
-    const chunk = await service.getChunk(req.params.id);
-    if (!chunk) return res.status(404).json({ message: "Not found" });
-    res.json(chunk);
-  } catch (err) {
-    next(err);
+  constructor() {
+    this.service = new ChunkService();
   }
-});
 
-export default router;
+  listByDocument = async (req: Request, res: Response) => {
+    const { documentId, workspaceId } = req.params;
+    const chunks = await this.service.listByDocument(documentId, workspaceId);
+    res.json(chunks);
+  };
+
+  get = async (req: Request, res: Response) => {
+    const { id, workspaceId } = req.params;
+    const chunk = await this.service.get(id, workspaceId);
+
+    if (!chunk) {
+      return res.status(404).json({ error: "Chunk not found" });
+    }
+
+    res.json(chunk);
+  };
+
+  create = async (req: Request, res: Response) => {
+    const { documentId, workspaceId } = req.params;
+    const { content, index } = req.body;
+
+    const chunk = await this.service.create(
+      workspaceId,
+      documentId,
+      content,
+      index
+    );
+
+    res.status(201).json(chunk);
+  };
+
+  update = async (req: Request, res: Response) => {
+    const { id, workspaceId } = req.params;
+    const { content, index } = req.body;
+
+    const chunk = await this.service.update(
+      id,
+      workspaceId,
+      content,
+      index
+    );
+
+    if (!chunk) {
+      return res.status(404).json({ error: "Chunk not found" });
+    }
+
+    res.json(chunk);
+  };
+
+  delete = async (req: Request, res: Response) => {
+    const { id, workspaceId } = req.params;
+
+    await this.service.delete(id, workspaceId);
+    res.status(204).send();
+  };
+}

@@ -1,62 +1,66 @@
-import { db } from "../../db";
-import { DataSource } from "../entities/DataSource";
-import { DataSourceRepository } from "./DataSourceRepository";
+import { pool } from "../../db";
 
-export class PostgresDataSourceRepository implements DataSourceRepository {
-  async findById(id: string): Promise<DataSource | null> {
-    const result = await db.query(
-      `SELECT id, workspace_id, name, schema_json, row_count, created_at, updated_at, deleted_at
+export class PostgresDataSourceRepository {
+  async listByWorkspace(workspaceId: string) {
+    const result = await pool.query(
+      `SELECT *
        FROM data_sources
-       WHERE id = $1`,
-      [id]
-    );
-    if (result.rowCount === 0) return null;
-    const row = result.rows[0];
-    return {
-      id: row.id,
-      workspaceId: row.workspace_id,
-      name: row.name,
-      schemaJson: row.schema_json,
-      rowCount: row.row_count,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      deletedAt: row.deleted_at,
-    };
-  }
-
-  async findByWorkspace(workspaceId: string): Promise<DataSource[]> {
-    const result = await db.query(
-      `SELECT id, workspace_id, name, schema_json, row_count, created_at, updated_at, deleted_at
-       FROM data_sources
-       WHERE workspace_id = $1 AND deleted_at IS NULL`,
+       WHERE workspace_id = $1
+       ORDER BY created_at DESC`,
       [workspaceId]
     );
-    return result.rows.map((row) => ({
-      id: row.id,
-      workspaceId: row.workspace_id,
-      name: row.name,
-      schemaJson: row.schema_json,
-      rowCount: row.row_count,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      deletedAt: row.deleted_at,
-    }));
+    return result.rows;
   }
 
-  async create(dataSource: DataSource): Promise<void> {
-    await db.query(
-      `INSERT INTO data_sources (id, workspace_id, name, schema_json, row_count, created_at, updated_at, deleted_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [
-        dataSource.id,
-        dataSource.workspaceId,
-        dataSource.name,
-        dataSource.schemaJson,
-        dataSource.rowCount,
-        dataSource.createdAt,
-        dataSource.updatedAt,
-        dataSource.deletedAt,
-      ]
+  async getById(id: string, workspaceId: string) {
+    const result = await pool.query(
+      `SELECT *
+       FROM data_sources
+       WHERE id = $1
+         AND workspace_id = $2`,
+      [id, workspaceId]
+    );
+    return result.rows[0];
+  }
+
+  async create(
+    workspaceId: string,
+    type: string,
+    config: any
+  ) {
+    const result = await pool.query(
+      `INSERT INTO data_sources (workspace_id, type, config)
+       VALUES ($1, $2, $3)
+       RETURNING *`,
+      [workspaceId, type, config]
+    );
+    return result.rows[0];
+  }
+
+  async update(
+    id: string,
+    workspaceId: string,
+    type: string,
+    config: any
+  ) {
+    const result = await pool.query(
+      `UPDATE data_sources
+       SET type = $3,
+           config = $4
+       WHERE id = $1
+         AND workspace_id = $2
+       RETURNING *`,
+      [id, workspaceId, type, config]
+    );
+    return result.rows[0];
+  }
+
+  async delete(id: string, workspaceId: string) {
+    await pool.query(
+      `DELETE FROM data_sources
+       WHERE id = $1
+         AND workspace_id = $2`,
+      [id, workspaceId]
     );
   }
 }

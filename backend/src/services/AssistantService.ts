@@ -1,18 +1,38 @@
-import { AssistantRepository } from "../domain/repositories/AssistantRepository";
-import { Assistant } from "../domain/entities/Assistant";
+import { PostgresAssistantRepository } from "../repositories/PostgresAssistantRepository";
 
 export class AssistantService {
-  constructor(private readonly repo: AssistantRepository) {}
+  private repo: PostgresAssistantRepository;
 
-  async getAssistant(id: string): Promise<Assistant | null> {
-    return this.repo.findById(id);
+  constructor() {
+    this.repo = new PostgresAssistantRepository();
   }
 
-  async getByWorkspace(workspaceId: string): Promise<Assistant[]> {
-    return this.repo.findByWorkspace(workspaceId);
+  async list(workspaceId: string) {
+    return this.repo.listByWorkspace(workspaceId);
   }
 
-  async createAssistant(assistant: Assistant): Promise<void> {
-    await this.repo.create(assistant);
+  async get(id: string, workspaceId: string) {
+    return this.repo.getById(id, workspaceId);
+  }
+
+  async create(
+    workspaceId: string,
+    name: string,
+    description: string | null
+  ) {
+    return this.repo.create(workspaceId, name, description);
+  }
+
+  async update(
+    id: string,
+    workspaceId: string,
+    name: string,
+    description: string | null
+  ) {
+    return this.repo.update(id, workspaceId, name, description);
+  }
+
+  async delete(id: string, workspaceId: string) {
+    await this.repo.delete(id, workspaceId);
   }
 }

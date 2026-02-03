@@ -1,18 +1,38 @@
-import { WorkflowRepository } from "../domain/repositories/WorkflowRepository";
-import { Workflow } from "../domain/entities/Workflow";
+import { PostgresWorkflowRepository } from "../repositories/PostgresWorkflowRepository";
 
 export class WorkflowService {
-  constructor(private readonly repo: WorkflowRepository) {}
+  private repo: PostgresWorkflowRepository;
 
-  async getWorkflow(id: string): Promise<Workflow | null> {
-    return this.repo.findById(id);
+  constructor() {
+    this.repo = new PostgresWorkflowRepository();
   }
 
-  async getByWorkspace(workspaceId: string): Promise<Workflow[]> {
-    return this.repo.findByWorkspace(workspaceId);
+  async list(workspaceId: string) {
+    return this.repo.listByWorkspace(workspaceId);
   }
 
-  async createWorkflow(workflow: Workflow): Promise<void> {
-    await this.repo.create(workflow);
+  async get(id: string, workspaceId: string) {
+    return this.repo.getById(id, workspaceId);
+  }
+
+  async create(
+    workspaceId: string,
+    name: string,
+    description: string | null
+  ) {
+    return this.repo.create(workspaceId, name, description);
+  }
+
+  async update(
+    id: string,
+    workspaceId: string,
+    name: string,
+    description: string | null
+  ) {
+    return this.repo.update(id, workspaceId, name, description);
+  }
+
+  async delete(id: string, workspaceId: string) {
+    await this.repo.delete(id, workspaceId);
   }
 }

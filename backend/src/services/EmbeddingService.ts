@@ -1,18 +1,30 @@
-import { EmbeddingRepository } from "../domain/repositories/EmbeddingRepository";
-import { Embedding } from "../domain/entities/Embedding";
+import { PostgresEmbeddingRepository } from "../repositories/PostgresEmbeddingRepository";
 
 export class EmbeddingService {
-  constructor(private readonly repo: EmbeddingRepository) {}
+  private repo: PostgresEmbeddingRepository;
 
-  async getEmbedding(id: string): Promise<Embedding | null> {
-    return this.repo.findById(id);
+  constructor() {
+    this.repo = new PostgresEmbeddingRepository();
   }
 
-  async getByChunk(chunkId: string): Promise<Embedding[]> {
-    return this.repo.findByChunk(chunkId);
+  async listByChunk(chunkId: string, workspaceId: string) {
+    return this.repo.listByChunk(chunkId, workspaceId);
   }
 
-  async createEmbedding(embedding: Embedding): Promise<void> {
-    await this.repo.create(embedding);
+  async get(id: string, workspaceId: string) {
+    return this.repo.getById(id, workspaceId);
+  }
+
+  async create(
+    workspaceId: string,
+    chunkId: string,
+    vector: number[],
+    model: string
+  ) {
+    return this.repo.create(workspaceId, chunkId, vector, model);
+  }
+
+  async deleteByChunk(chunkId: string, workspaceId: string) {
+    await this.repo.deleteByChunk(chunkId, workspaceId);
   }
 }

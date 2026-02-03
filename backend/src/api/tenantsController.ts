@@ -1,18 +1,53 @@
-import express from "express";
+import { Request, Response } from "express";
 import { TenantService } from "../services/TenantService";
-import { PostgresTenantRepository } from "../domain/repositories/PostgresTenantRepository";
 
-const router = express.Router();
-const service = new TenantService(new PostgresTenantRepository());
+export class TenantController {
+  private service: TenantService;
 
-router.get("/:id", async (req, res, next) => {
-  try {
-    const tenant = await service.getTenant(req.params.id);
-    if (!tenant) return res.status(404).json({ message: "Not found" });
-    res.json(tenant);
-  } catch (err) {
-    next(err);
+  constructor() {
+    this.service = new TenantService();
   }
-});
 
-export default router;
+  list = async (_req: Request, res: Response) => {
+    const tenants = await this.service.list();
+    res.json(tenants);
+  };
+
+  get = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const tenant = await this.service.get(id);
+
+    if (!tenant) {
+      return res.status(404).json({ error: "Tenant not found" });
+    }
+
+    res.json(tenant);
+  };
+
+  create = async (req: Request, res: Response) => {
+    const { name } = req.body;
+
+    const tenant = await this.service.create(name);
+    res.status(201).json(tenant);
+  };
+
+  update = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { name } = req.body;
+
+    const tenant = await this.service.update(id, name);
+
+    if (!tenant) {
+      return res.status(404).json({ error: "Tenant not found" });
+    }
+
+    res.json(tenant);
+  };
+
+  delete = async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    await this.service.delete(id);
+    res.status(204).send();
+  };
+}

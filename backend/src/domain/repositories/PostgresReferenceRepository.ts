@@ -1,59 +1,39 @@
-import { db } from "../../db";
-import { Reference } from "../entities/Reference";
-import { ReferenceRepository } from "./ReferenceRepository";
+import { pool } from "../../db";
 
-export class PostgresReferenceRepository implements ReferenceRepository {
-  async findById(id: string): Promise<Reference | null> {
-    const result = await db.query(
-      `SELECT id, workspace_id, name, description, created_at, updated_at, deleted_at
+export class PostgresReferenceRepository {
+  async listByDocument(documentId: string, workspaceId: string) {
+    const result = await pool.query(
+      `SELECT *
        FROM references
-       WHERE id = $1`,
-      [id]
+       WHERE document_id = $1
+         AND workspace_id = $2
+       ORDER BY created_at ASC`,
+      [documentId, workspaceId]
     );
-    if (result.rowCount === 0) return null;
-    const row = result.rows[0];
-    return {
-      id: row.id,
-      workspaceId: row.workspace_id,
-      name: row.name,
-      description: row.description,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      deletedAt: row.deleted_at,
-    };
+    return result.rows;
   }
 
-  async findByWorkspace(workspaceId: string): Promise<Reference[]> {
-    const result = await db.query(
-      `SELECT id, workspace_id, name, description, created_at, updated_at, deleted_at
-       FROM references
-       WHERE workspace_id = $1 AND deleted_at IS NULL`,
-      [workspaceId]
+  async create(
+    workspaceId: string,
+    documentId: string,
+    chunkId: string,
+    reference: string
+  ) {
+    const result = await pool.query(
+      `INSERT INTO references (workspace_id, document_id, chunk_id, reference)
+       VALUES ($1, $2, $3, $4)
+       RETURNING *`,
+      [workspaceId, documentId, chunkId, reference]
     );
-    return result.rows.map((row) => ({
-      id: row.id,
-      workspaceId: row.workspace_id,
-      name: row.name,
-      description: row.description,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      deletedAt: row.deleted_at,
-    }));
+    return result.rows[0];
   }
 
-  async create(reference: Reference): Promise<void> {
-    await db.query(
-      `INSERT INTO references (id, workspace_id, name, description, created_at, updated_at, deleted_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [
-        reference.id,
-        reference.workspaceId,
-        reference.name,
-        reference.description,
-        reference.createdAt,
-        reference.updatedAt,
-        reference.deletedAt,
-      ]
+  async deleteByDocument(documentId: string, workspaceId: string) {
+    await pool.query(
+      `DELETE FROM references
+       WHERE document_id = $1
+         AND workspace_id = $2`,
+      [documentId, workspaceId]
     );
   }
 }

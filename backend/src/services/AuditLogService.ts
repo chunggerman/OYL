@@ -1,18 +1,25 @@
-import { AuditLogRepository } from "../domain/repositories/AuditLogRepository";
-import { AuditLog } from "../domain/entities/AuditLog";
+import { PostgresAuditLogRepository } from "../repositories/PostgresAuditLogRepository";
 
 export class AuditLogService {
-  constructor(private readonly repo: AuditLogRepository) {}
+  private repo: PostgresAuditLogRepository;
 
-  async getLog(id: string): Promise<AuditLog | null> {
-    return this.repo.findById(id);
+  constructor() {
+    this.repo = new PostgresAuditLogRepository();
   }
 
-  async getByWorkspace(workspaceId: string): Promise<AuditLog[]> {
-    return this.repo.findByWorkspace(workspaceId);
+  async list(workspaceId: string) {
+    return this.repo.listByWorkspace(workspaceId);
   }
 
-  async createLog(log: AuditLog): Promise<void> {
-    await this.repo.create(log);
+  async create(
+    workspaceId: string,
+    action: string,
+    metadata: any
+  ) {
+    return this.repo.create(workspaceId, action, metadata);
+  }
+
+  async deleteByWorkspace(workspaceId: string) {
+    await this.repo.deleteByWorkspace(workspaceId);
   }
 }

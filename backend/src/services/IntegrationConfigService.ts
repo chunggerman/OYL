@@ -1,18 +1,38 @@
-import { IntegrationConfigRepository } from "../domain/repositories/IntegrationConfigRepository";
-import { IntegrationConfig } from "../domain/entities/IntegrationConfig";
+import { PostgresIntegrationConfigRepository } from "../repositories/PostgresIntegrationConfigRepository";
 
 export class IntegrationConfigService {
-  constructor(private readonly repo: IntegrationConfigRepository) {}
+  private repo: PostgresIntegrationConfigRepository;
 
-  async getConfig(id: string): Promise<IntegrationConfig | null> {
-    return this.repo.findById(id);
+  constructor() {
+    this.repo = new PostgresIntegrationConfigRepository();
   }
 
-  async getByWorkspace(workspaceId: string): Promise<IntegrationConfig[]> {
-    return this.repo.findByWorkspace(workspaceId);
+  async list(workspaceId: string) {
+    return this.repo.listByWorkspace(workspaceId);
   }
 
-  async createConfig(config: IntegrationConfig): Promise<void> {
-    await this.repo.create(config);
+  async get(id: string, workspaceId: string) {
+    return this.repo.getById(id, workspaceId);
+  }
+
+  async create(
+    workspaceId: string,
+    provider: string,
+    config: any
+  ) {
+    return this.repo.create(workspaceId, provider, config);
+  }
+
+  async update(
+    id: string,
+    workspaceId: string,
+    provider: string,
+    config: any
+  ) {
+    return this.repo.update(id, workspaceId, provider, config);
+  }
+
+  async delete(id: string, workspaceId: string) {
+    await this.repo.delete(id, workspaceId);
   }
 }

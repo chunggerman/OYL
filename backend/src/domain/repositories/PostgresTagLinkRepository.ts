@@ -1,50 +1,51 @@
-import { db } from "../../db";
-import { TagLink } from "../entities/TagLink";
-import { TagLinkRepository } from "./TagLinkRepository";
+import { pool } from "../../db";
 
-export class PostgresTagLinkRepository implements TagLinkRepository {
-  async findById(id: string): Promise<TagLink | null> {
-    const result = await db.query(
-      `SELECT id, tag_id, chunk_id, created_at
-       FROM tag_links
-       WHERE id = $1`,
-      [id]
+export class PostgresTagLinkRepository {
+  async listByChunk(chunkId: string, workspaceId: string) {
+    const result = await pool.query(
+      `SELECT *
+       FROM chunk_tags
+       WHERE chunk_id = $1
+         AND workspace_id = $2
+       ORDER BY confidence DESC`,
+      [chunkId, workspaceId]
     );
-    if (result.rowCount === 0) return null;
-    const row = result.rows[0];
-    return {
-      id: row.id,
-      tagId: row.tag_id,
-      chunkId: row.chunk_id,
-      createdAt: row.created_at,
-    };
+    return result.rows;
   }
 
-  async findByChunk(chunkId: string): Promise<TagLink[]> {
-    const result = await db.query(
-      `SELECT id, tag_id, chunk_id, created_at
-       FROM tag_links
-       WHERE chunk_id = $1`,
-      [chunkId]
+  async listByTag(tag: string, workspaceId: string) {
+    const result = await pool.query(
+      `SELECT *
+       FROM chunk_tags
+       WHERE tag = $1
+         AND workspace_id = $2
+       ORDER BY confidence DESC`,
+      [tag, workspaceId]
     );
-    return result.rows.map((row) => ({
-      id: row.id,
-      tagId: row.tag_id,
-      chunkId: row.chunk_id,
-      createdAt: row.created_at,
-    }));
+    return result.rows;
   }
 
-  async create(tagLink: TagLink): Promise<void> {
-    await db.query(
-      `INSERT INTO tag_links (id, tag_id, chunk_id, created_at)
-       VALUES ($1, $2, $3, $4)`,
-      [
-        tagLink.id,
-        tagLink.tagId,
-        tagLink.chunkId,
-        tagLink.createdAt,
-      ]
+  async create(
+    workspaceId: string,
+    chunkId: string,
+    tag: string,
+    confidence: number
+  ) {
+    const result = await pool.query(
+      `INSERT INTO chunk_tags (workspace_id, chunk_id, tag, confidence)
+       VALUES ($1, $2, $3, $4)
+       RETURNING *`,
+      [workspaceId, chunkId, tag, confidence]
+    );
+    return result.rows[0];
+  }
+
+  async deleteByChunk(chunkId: string, workspaceId: string) {
+    await pool.query(
+      `DELETE FROM chunk_tags
+       WHERE chunk_id = $1
+         AND workspace_id = $2`,
+      [chunkId, workspaceId]
     );
   }
 }

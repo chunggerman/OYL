@@ -1,8 +1,13 @@
 import { Router } from "express";
 import { pool } from "../../db";
 
+import { retrievalRoutes } from "./retrievalRoutes";
+import { workspaceRoutes } from "./workspaceRoutes";
+import { healthRoutes } from "./healthRoutes";
+
 const router = Router();
 
+// Existing workspace settings routes
 router.post("/workspaces/:id/settings/:key", async (req, res) => {
   const { id, key } = req.params;
   const { value } = req.body;
@@ -33,5 +38,10 @@ router.get("/workspaces/:id/settings/:key", async (req, res) => {
 
   res.status(200).json({ value: result.rows[0]["value"] });
 });
+
+// New routes
+router.use("/retrieval", retrievalRoutes);
+router.use("/workspace", workspaceRoutes);
+router.use("/health", healthRoutes);
 
 export default router;
