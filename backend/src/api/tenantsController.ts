@@ -1,53 +1,41 @@
 import { Request, Response } from "express";
 import { TenantService } from "../services/TenantService";
 
-export class TenantController {
-  private service: TenantService;
+const tenantService = new TenantService();
 
-  constructor() {
-    this.service = new TenantService();
+export class TenantsController {
+  async listTenants(req: Request, res: Response): Promise<void> {
+    const tenants = await tenantService.listTenants();
+    res.json(tenants);
   }
 
-  list = async (_req: Request, res: Response) => {
-    const tenants = await this.service.list();
-    res.json(tenants);
-  };
-
-  get = async (req: Request, res: Response) => {
+  async getTenant(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
-    const tenant = await this.service.get(id);
-
+    const tenant = await tenantService.getTenantById(id);
     if (!tenant) {
-      return res.status(404).json({ error: "Tenant not found" });
+      res.status(404).json({ error: "Tenant not found" });
+      return;
+    }
+    res.json(tenant);
+  }
+
+  async createTenant(req: Request, res: Response): Promise<void> {
+    const { name, metadataEncrypted } = req.body;
+    if (!name) {
+      res.status(400).json({ error: "name is required" });
+      return;
     }
 
-    res.json(tenant);
-  };
-
-  create = async (req: Request, res: Response) => {
-    const { name } = req.body;
-
-    const tenant = await this.service.create(name);
+    const tenant = await tenantService.createTenant(
+      name,
+      metadataEncrypted ?? null
+    );
     res.status(201).json(tenant);
-  };
+  }
 
-  update = async (req: Request, res: Response) => {
+  async deleteTenant(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
-    const { name } = req.body;
-
-    const tenant = await this.service.update(id, name);
-
-    if (!tenant) {
-      return res.status(404).json({ error: "Tenant not found" });
-    }
-
-    res.json(tenant);
-  };
-
-  delete = async (req: Request, res: Response) => {
-    const { id } = req.params;
-
-    await this.service.delete(id);
+    await tenantService.deleteTenant(id);
     res.status(204).send();
-  };
+  }
 }

@@ -1,38 +1,49 @@
-import { PostgresAssistantRepository } from "../repositories/PostgresAssistantRepository";
+import { AssistantRepository } from "../domain/repositories/AssistantRepository";
+import { Assistant } from "../domain/entities/Assistant";
+import { WorkspaceRepository } from "../domain/repositories/WorkspaceRepository";
 
 export class AssistantService {
-  private repo: PostgresAssistantRepository;
+  private assistantRepository: AssistantRepository;
+  private workspaceRepository: WorkspaceRepository;
 
-  constructor() {
-    this.repo = new PostgresAssistantRepository();
-  }
-
-  async list(workspaceId: string) {
-    return this.repo.listByWorkspace(workspaceId);
-  }
-
-  async get(id: string, workspaceId: string) {
-    return this.repo.getById(id, workspaceId);
-  }
-
-  async create(
-    workspaceId: string,
-    name: string,
-    description: string | null
+  constructor(
+    assistantRepository?: AssistantRepository,
+    workspaceRepository?: WorkspaceRepository
   ) {
-    return this.repo.create(workspaceId, name, description);
+    this.assistantRepository = assistantRepository ?? new AssistantRepository();
+    this.workspaceRepository = workspaceRepository ?? new WorkspaceRepository();
   }
 
-  async update(
-    id: string,
-    workspaceId: string,
-    name: string,
-    description: string | null
-  ) {
-    return this.repo.update(id, workspaceId, name, description);
+  async createAssistant(params: {
+    workspaceId: string;
+    name: string;
+    instruction?: string | null;
+    aiInstruction?: string | null;
+    settingsJson?: Record<string, any> | null;
+  }): Promise<Assistant> {
+    const workspace = await this.workspaceRepository.findById(params.workspaceId);
+    if (!workspace) {
+      throw new Error("Workspace not found");
+    }
+
+    return this.assistantRepository.create(
+      params.workspaceId,
+      params.name,
+      params.instruction ?? null,
+      params.aiInstruction ?? null,
+      params.settingsJson ?? null
+    );
   }
 
-  async delete(id: string, workspaceId: string) {
-    await this.repo.delete(id, workspaceId);
+  async getAssistantById(id: string): Promise<Assistant | null> {
+    return this.assistantRepository.findById(id);
+  }
+
+  async listAssistantsByWorkspace(workspaceId: string): Promise<Assistant[]> {
+    return this.assistantRepository.listByWorkspace(workspaceId);
+  }
+
+  async deleteAssistant(id: string): Promise<void> {
+    await this.assistantRepository.softDelete(id);
   }
 }

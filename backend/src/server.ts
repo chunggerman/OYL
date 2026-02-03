@@ -1,15 +1,12 @@
 import express from "express";
-import router from "./api/routes";
+import routes from "./api/routes";
 
 const app = express();
 app.use(express.json());
-app.use("/", router);
 
-export { app };
+app.use(routes);
 
-if (require.main === module) {
-  const port = process.env.PORT || 3001;
-  app.listen(port, () => {
-    console.log("Server running on port", port);
-  });
-}
+const port = process.env.PORT ?? 3000;
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});

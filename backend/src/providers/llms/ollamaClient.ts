@@ -1,31 +1,49 @@
-import type { LlmProvider } from "../registry/llms";
+import { LlmClient } from "../../services/LlmClient";
 
-export async function callOllamaLLM(
-  provider: LlmProvider,
-  messages: { role: string; content: string }[]
-): Promise<string> {
-  const res = await fetch(provider.endpoint, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: provider.model,
-      messages
-    })
-  });
+export class OllamaLlmClient implements LlmClient {
+  private baseUrl: string;
 
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Ollama LLM error (${res.status}): ${body}`);
+  constructor(baseUrl = "http://localhost:11434") {
+    this.baseUrl = baseUrl;
   }
 
-  const json = await res.json();
+  async complete(params: {
+    model: string;
+    prompt: string;
+    temperature?: number;
+    maxTokens?: number;
+  }): Promise<{ completion: string }> {
+    const response = await fetch(`${this.baseUrl}/api/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: params.model,
+        prompt: params.prompt,
+        options: {
+          temperature: params.temperature ?? 0.2,
+          num_predict: params.maxTokens ?? 512,
+        },
+      }),
+    });
 
-  if (typeof json.message?.content === "string") {
-    return json.message.content;
-  }
-  if (Array.isArray(json.choices) && json.choices[0]?.message?.content) {
-    return json.choices[0].message.content;
-  }
+    if (!response.ok) {
+      throw new Error(`Ollama LLM error: ${response.statusText}`);
+    }
 
-  throw new Error("Unexpected Ollama LLM response shape");
+    let fullText = "";
+    for await (const chunk of response.body as any) {
+      const text = new TextDecoder().decode(chunk);
+      const lines = text.trim().split("\n");
+      for (const line of lines) {
+        try {
+          const json = JSON.parse(line);
+          if (json.response) fullText += json.response;
+        } catch {
+          continue;
+        }
+      }
+    }
+
+    return { completion: fullText.trim() };
+  }
 }

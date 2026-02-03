@@ -1,22 +1,12 @@
 import { Router } from "express";
-import { authMiddleware } from "../../middleware/authMiddleware";
-import { tenantMiddleware } from "../../middleware/tenantMiddleware";
+import { WorkspacesController } from "../workspacesController";
 
-export const workspaceRoutes = Router();
+const router = Router();
+const controller = new WorkspacesController();
 
-workspaceRoutes.get(
-  "/config",
-  authMiddleware,
-  tenantMiddleware,
-  async (req, res) => {
-    res.json({
-      workspaceId: req.workspaceId,
-      config: {
-        model: "gpt-4",
-        embeddingModel: "nomic-embed-text",
-        temperature: 0.2,
-        maxTokens: 2048,
-      },
-    });
-  }
-);
+router.get("/workspaces", (req, res) => controller.listWorkspaces(req, res));
+router.get("/workspaces/:id", (req, res) => controller.getWorkspace(req, res));
+router.post("/workspaces", (req, res) => controller.createWorkspace(req, res));
+router.delete("/workspaces/:id", (req, res) => controller.deleteWorkspace(req, res));
+
+export default router;

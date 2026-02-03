@@ -4,7 +4,7 @@ export interface Assistant {
   name: string;
   instruction: string | null;
   aiInstruction: string | null;
-  settingsJson: any | null;
+  settingsJson: Record<string, any> | null;
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;

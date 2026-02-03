@@ -1,58 +1,43 @@
-import { PostgresChunkRepository } from "../repositories/PostgresChunkRepository";
-import { PostgresEmbeddingRepository } from "../repositories/PostgresEmbeddingRepository";
-import { PostgresValidationRepository } from "../repositories/PostgresValidationRepository";
+import { ChunkRepository } from "../domain/repositories/ChunkRepository";
+import { Chunk } from "../domain/entities/Chunk";
+import { DocumentRepository } from "../domain/repositories/DocumentRepository";
 
 export class ChunkService {
-  private repo: PostgresChunkRepository;
-  private embeddingRepo: PostgresEmbeddingRepository;
-  private validationRepo: PostgresValidationRepository;
+  private chunkRepository: ChunkRepository;
+  private documentRepository: DocumentRepository;
 
-  constructor() {
-    this.repo = new PostgresChunkRepository();
-    this.embeddingRepo = new PostgresEmbeddingRepository();
-    this.validationRepo = new PostgresValidationRepository();
-  }
-
-  async listByDocument(documentId: string, workspaceId: string) {
-    return this.repo.listByDocument(documentId, workspaceId);
-  }
-
-  async get(id: string, workspaceId: string) {
-    return this.repo.getById(id, workspaceId);
-  }
-
-  async create(
-    workspaceId: string,
-    documentId: string,
-    content: string,
-    index: number
+  constructor(
+    chunkRepository?: ChunkRepository,
+    documentRepository?: DocumentRepository
   ) {
-    return this.repo.create(workspaceId, documentId, content, index);
+    this.chunkRepository = chunkRepository ?? new ChunkRepository();
+    this.documentRepository = documentRepository ?? new DocumentRepository();
   }
 
-  async update(
-    id: string,
-    workspaceId: string,
-    content: string,
-    index: number
-  ) {
-    return this.repo.update(id, workspaceId, content, index);
-  }
-
-  async delete(id: string, workspaceId: string) {
-    await this.embeddingRepo.deleteByChunk(id, workspaceId);
-    await this.validationRepo.deleteByChunk(id, workspaceId);
-    await this.repo.delete(id, workspaceId);
-  }
-
-  async deleteByDocument(documentId: string, workspaceId: string) {
-    const chunks = await this.repo.listByDocument(documentId, workspaceId);
-
-    for (const chunk of chunks) {
-      await this.embeddingRepo.deleteByChunk(chunk.id, workspaceId);
-      await this.validationRepo.deleteByChunk(chunk.id, workspaceId);
+  async createChunk(params: {
+    documentId: string;
+    position: number;
+    text: string;
+    tagsText?: string[] | null;
+  }): Promise<Chunk> {
+    const document = await this.documentRepository.findById(params.documentId);
+    if (!document) {
+      throw new Error("Document not found");
     }
 
-    await this.repo.deleteByDocument(documentId, workspaceId);
+    return this.chunkRepository.create({
+      documentId: params.documentId,
+      position: params.position,
+      text: params.text,
+      tagsText: params.tagsText ?? null,
+    });
+  }
+
+  async listChunksByDocument(documentId: string): Promise<Chunk[]> {
+    return this.chunkRepository.listByDocument(documentId);
+  }
+
+  async deleteChunksByDocument(documentId: string): Promise<void> {
+    await this.chunkRepository.softDeleteByDocument(documentId);
   }
 }

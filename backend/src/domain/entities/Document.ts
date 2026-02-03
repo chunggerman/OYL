@@ -1,11 +1,9 @@
 export interface Document {
   id: string;
-  referenceId: string;
-  filename: string;
-  mimeType: string;
-  sizeBytes: number;
-  metadataJson: any | null;
-  text: string | null;
+  workspaceId: string;
+  referenceId: string | null;
+  title: string;
+  content: string | null;
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;

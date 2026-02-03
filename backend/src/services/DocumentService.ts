@@ -1,55 +1,47 @@
-import { PostgresDocumentRepository } from "../repositories/PostgresDocumentRepository";
-import { PostgresChunkRepository } from "../repositories/PostgresChunkRepository";
-import { PostgresEmbeddingRepository } from "../repositories/PostgresEmbeddingRepository";
-import { PostgresValidationRepository } from "../repositories/PostgresValidationRepository";
+import { DocumentRepository } from "../domain/repositories/DocumentRepository";
+import { WorkspaceRepository } from "../domain/repositories/WorkspaceRepository";
+import { Document } from "../domain/entities/Document";
 
 export class DocumentService {
-  private repo: PostgresDocumentRepository;
-  private chunkRepo: PostgresChunkRepository;
-  private embeddingRepo: PostgresEmbeddingRepository;
-  private validationRepo: PostgresValidationRepository;
+  private documentRepository: DocumentRepository;
+  private workspaceRepository: WorkspaceRepository;
 
-  constructor() {
-    this.repo = new PostgresDocumentRepository();
-    this.chunkRepo = new PostgresChunkRepository();
-    this.embeddingRepo = new PostgresEmbeddingRepository();
-    this.validationRepo = new PostgresValidationRepository();
-  }
-
-  async list(workspaceId: string) {
-    return this.repo.listByWorkspace(workspaceId);
-  }
-
-  async get(id: string, workspaceId: string) {
-    return this.repo.getById(id, workspaceId);
-  }
-
-  async create(
-    workspaceId: string,
-    title: string,
-    source: string | null
+  constructor(
+    documentRepository?: DocumentRepository,
+    workspaceRepository?: WorkspaceRepository
   ) {
-    return this.repo.create(workspaceId, title, source);
+    this.documentRepository = documentRepository ?? new DocumentRepository();
+    this.workspaceRepository = workspaceRepository ?? new WorkspaceRepository();
   }
 
-  async update(
-    id: string,
-    workspaceId: string,
-    title: string,
-    source: string | null
-  ) {
-    return this.repo.update(id, workspaceId, title, source);
-  }
-
-  async delete(id: string, workspaceId: string) {
-    const chunks = await this.chunkRepo.listByDocument(id, workspaceId);
-
-    for (const chunk of chunks) {
-      await this.embeddingRepo.deleteByChunk(chunk.id, workspaceId);
-      await this.validationRepo.deleteByChunk(chunk.id, workspaceId);
+  async createDocument(params: {
+    workspaceId: string;
+    referenceId?: string | null;
+    title: string;
+    content?: string | null;
+  }): Promise<Document> {
+    const workspace = await this.workspaceRepository.findById(params.workspaceId);
+    if (!workspace) {
+      throw new Error("Workspace not found");
     }
 
-    await this.chunkRepo.deleteByDocument(id, workspaceId);
-    await this.repo.delete(id, workspaceId);
+    return this.documentRepository.create({
+      workspaceId: params.workspaceId,
+      referenceId: params.referenceId ?? null,
+      title: params.title,
+      content: params.content ?? null,
+    });
+  }
+
+  async getDocumentById(id: string): Promise<Document | null> {
+    return this.documentRepository.findById(id);
+  }
+
+  async listDocumentsByWorkspace(workspaceId: string): Promise<Document[]> {
+    return this.documentRepository.listByWorkspace(workspaceId);
+  }
+
+  async deleteDocument(id: string): Promise<void> {
+    await this.documentRepository.softDelete(id);
   }
 }

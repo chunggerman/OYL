@@ -1,30 +1,63 @@
-import { PostgresEmbeddingRepository } from "../repositories/PostgresEmbeddingRepository";
+import { EmbeddingRepository } from "../domain/repositories/EmbeddingRepository";
+import { ChunkRepository } from "../domain/repositories/ChunkRepository";
+import { Embedding } from "../domain/entities/Embedding";
+
+export interface VectorStoreClient {
+  upsertEmbedding(params: {
+    workspaceId: string;
+    documentId: string;
+    chunkId: string;
+    text: string;
+  }): Promise<string>;
+
+  query(params: {
+    workspaceId: string;
+    query: string;
+    topK: number;
+  }): Promise<
+    Array<{
+      chunkId: string;
+      score: number;
+    }>
+  >;
+}
 
 export class EmbeddingService {
-  private repo: PostgresEmbeddingRepository;
+  private embeddingRepository: EmbeddingRepository;
+  private chunkRepository: ChunkRepository;
+  private vectorStoreClient: VectorStoreClient;
 
-  constructor() {
-    this.repo = new PostgresEmbeddingRepository();
-  }
-
-  async listByChunk(chunkId: string, workspaceId: string) {
-    return this.repo.listByChunk(chunkId, workspaceId);
-  }
-
-  async get(id: string, workspaceId: string) {
-    return this.repo.getById(id, workspaceId);
-  }
-
-  async create(
-    workspaceId: string,
-    chunkId: string,
-    vector: number[],
-    model: string
+  constructor(
+    vectorStoreClient: VectorStoreClient,
+    embeddingRepository?: EmbeddingRepository,
+    chunkRepository?: ChunkRepository
   ) {
-    return this.repo.create(workspaceId, chunkId, vector, model);
+    this.vectorStoreClient = vectorStoreClient;
+    this.embeddingRepository = embeddingRepository ?? new EmbeddingRepository();
+    this.chunkRepository = chunkRepository ?? new ChunkRepository();
   }
 
-  async deleteByChunk(chunkId: string, workspaceId: string) {
-    await this.repo.deleteByChunk(chunkId, workspaceId);
+  async createEmbeddingForChunk(params: {
+    workspaceId: string;
+    documentId: string;
+    chunkId: string;
+  }): Promise<Embedding> {
+    const chunk = await this.chunkRepository.listByDocument(params.documentId);
+    const target = chunk.find((c) => c.id === params.chunkId);
+    if (!target) {
+      throw new Error("Chunk not found for embedding");
+    }
+
+    const vectorRef = await this.vectorStoreClient.upsertEmbedding({
+      workspaceId: params.workspaceId,
+      documentId: params.documentId,
+      chunkId: params.chunkId,
+      text: target.text,
+    });
+
+    return this.embeddingRepository.create({
+      chunkId: params.chunkId,
+      vectorRef,
+    });
   }
 }

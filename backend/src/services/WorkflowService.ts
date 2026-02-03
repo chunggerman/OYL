@@ -1,38 +1,40 @@
-import { PostgresWorkflowRepository } from "../repositories/PostgresWorkflowRepository";
+import { WorkspaceRepository } from "../domain/repositories/WorkspaceRepository";
+import { Workspace } from "../domain/entities/Workspace";
+import { TenantRepository } from "../domain/repositories/TenantRepository";
 
-export class WorkflowService {
-  private repo: PostgresWorkflowRepository;
+export class WorkspaceService {
+  private workspaceRepository: WorkspaceRepository;
+  private tenantRepository: TenantRepository;
 
-  constructor() {
-    this.repo = new PostgresWorkflowRepository();
+  constructor(
+    workspaceRepository?: WorkspaceRepository,
+    tenantRepository?: TenantRepository
+  ) {
+    this.workspaceRepository = workspaceRepository ?? new WorkspaceRepository();
+    this.tenantRepository = tenantRepository ?? new TenantRepository();
   }
 
-  async list(workspaceId: string) {
-    return this.repo.listByWorkspace(workspaceId);
-  }
-
-  async get(id: string, workspaceId: string) {
-    return this.repo.getById(id, workspaceId);
-  }
-
-  async create(
-    workspaceId: string,
+  async createWorkspace(
+    tenantId: string,
     name: string,
     description: string | null
-  ) {
-    return this.repo.create(workspaceId, name, description);
+  ): Promise<Workspace> {
+    const tenant = await this.tenantRepository.findById(tenantId);
+    if (!tenant) {
+      throw new Error("Tenant not found");
+    }
+    return this.workspaceRepository.create(tenantId, name, description);
   }
 
-  async update(
-    id: string,
-    workspaceId: string,
-    name: string,
-    description: string | null
-  ) {
-    return this.repo.update(id, workspaceId, name, description);
+  async getWorkspaceById(id: string): Promise<Workspace | null> {
+    return this.workspaceRepository.findById(id);
   }
 
-  async delete(id: string, workspaceId: string) {
-    await this.repo.delete(id, workspaceId);
+  async listWorkspacesByTenant(tenantId: string): Promise<Workspace[]> {
+    return this.workspaceRepository.listByTenant(tenantId);
+  }
+
+  async deleteWorkspace(id: string): Promise<void> {
+    await this.workspaceRepository.softDelete(id);
   }
 }
