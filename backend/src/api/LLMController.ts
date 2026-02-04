@@ -1,3 +1,5 @@
+// backend/src/api/LLMController.ts
+
 import { Request, Response } from "express";
 import { LLMService } from "../services/LLMService";
 
@@ -10,9 +12,14 @@ export class LLMController {
 
   generate = async (req: Request, res: Response) => {
     const { workspaceId } = req.params;
-    const { threadId, message } = req.body;
+    const { prompt, model } = req.body;
 
-    const result = await this.service.generate(workspaceId, threadId, message);
+    const result = await this.service.generate(
+      workspaceId,
+      prompt,
+      model || "default-model"
+    );
+
     res.json(result);
   };
 }

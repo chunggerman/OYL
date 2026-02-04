@@ -1,42 +1,32 @@
-import { PostgresMessageRepository } from "../repositories/PostgresMessageRepository";
-import { PostgresThreadRepository } from "../repositories/PostgresThreadRepository";
+// backend/src/services/MessageService.ts
 
 export class MessageService {
-  private repo: PostgresMessageRepository;
-  private threadRepo: PostgresThreadRepository;
-
   constructor() {
-    this.repo = new PostgresMessageRepository();
-    this.threadRepo = new PostgresThreadRepository();
+    // Add DB/model clients here later if needed
   }
 
   async list(threadId: string, workspaceId: string) {
-    return this.repo.listByThread(threadId, workspaceId);
+    // TODO: replace with real DB query
+    return [];
   }
 
   async get(id: string, workspaceId: string) {
-    return this.repo.getById(id, workspaceId);
+    // TODO: replace with real DB query
+    return null;
   }
 
-  async create(
-    workspaceId: string,
-    threadId: string,
-    role: string,
-    content: string
-  ) {
-    const message = await this.repo.create(
+  async create(workspaceId: string, threadId: string, content: string) {
+    // TODO: replace with real DB insert
+    return {
+      id: "temp-id",
       workspaceId,
       threadId,
-      role,
       content
-    );
-
-    await this.threadRepo.touch(threadId, workspaceId);
-
-    return message;
+    };
   }
 
-  async deleteByThread(threadId: string, workspaceId: string) {
-    await this.repo.deleteByThread(threadId, workspaceId);
+  async delete(id: string, workspaceId: string) {
+    // TODO: replace with real DB delete
+    return;
   }
 }

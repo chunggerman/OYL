@@ -1,13 +1,12 @@
 import { Router } from "express";
-import { WorkspaceController } from "../WorkspaceController";
+import WorkspacesController from "../workspacesController";
 
 const router = Router();
-const controller = new WorkspaceController();
 
-router.get("/", controller.list);
-router.get("/:id", controller.get);
-router.post("/", controller.create);
-router.put("/:id", controller.update);
-router.delete("/:id", controller.delete);
+router.post("/workspaces", (req, res) => WorkspacesController.createWorkspace(req, res));
+router.get("/workspaces", (req, res) => WorkspacesController.getAllWorkspaces(req, res));
+router.get("/workspaces/:id", (req, res) => WorkspacesController.getWorkspaceById(req, res));
+router.put("/workspaces/:id", (req, res) => WorkspacesController.updateWorkspace(req, res));
+router.delete("/workspaces/:id", (req, res) => WorkspacesController.deleteWorkspace(req, res));
 
 export default router;

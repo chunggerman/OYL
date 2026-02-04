@@ -1,0 +1,1 @@
+-- Migration 018 intentionally left blank (duplicate of 008_create_tags.sql)

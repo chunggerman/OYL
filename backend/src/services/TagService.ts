@@ -1,42 +1,40 @@
-import { PostgresTagRepository } from "../repositories/PostgresTagRepository";
-import { PostgresDocumentTagRepository } from "../repositories/PostgresDocumentTagRepository";
+// backend/src/services/TagService.ts
 
 export class TagService {
-  private repo: PostgresTagRepository;
-  private documentTagRepo: PostgresDocumentTagRepository;
-
   constructor() {
-    this.repo = new PostgresTagRepository();
-    this.documentTagRepo = new PostgresDocumentTagRepository();
+    // Add DB/model clients here later if needed
   }
 
   async list(workspaceId: string) {
-    return this.repo.listByWorkspace(workspaceId);
+    // TODO: replace with real DB query
+    return [];
   }
 
   async get(id: string, workspaceId: string) {
-    return this.repo.getById(id, workspaceId);
+    // TODO: replace with real DB query
+    return null;
   }
 
-  async create(
-    workspaceId: string,
-    name: string,
-    color: string | null
-  ) {
-    return this.repo.create(workspaceId, name, color);
+  async create(workspaceId: string, name: string) {
+    // TODO: replace with real DB insert
+    return {
+      id: "temp-id",
+      workspaceId,
+      name
+    };
   }
 
-  async update(
-    id: string,
-    workspaceId: string,
-    name: string,
-    color: string | null
-  ) {
-    return this.repo.update(id, workspaceId, name, color);
+  async update(id: string, workspaceId: string, name: string) {
+    // TODO: replace with real DB update
+    return {
+      id,
+      workspaceId,
+      name
+    };
   }
 
   async delete(id: string, workspaceId: string) {
-    await this.documentTagRepo.deleteByTag(id, workspaceId);
-    await this.repo.delete(id, workspaceId);
+    // TODO: replace with real DB delete
+    return;
   }
 }

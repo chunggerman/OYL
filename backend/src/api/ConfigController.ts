@@ -1,3 +1,5 @@
+// backend/src/api/ConfigController.ts
+
 import { Request, Response } from "express";
 import { ConfigService } from "../services/ConfigService";
 
@@ -8,9 +10,15 @@ export class ConfigController {
     this.service = new ConfigService();
   }
 
-  get = async (req: Request, res: Response) => {
+  list = async (req: Request, res: Response) => {
     const { workspaceId } = req.params;
-    const config = await this.service.get(workspaceId);
+    const configs = await this.service.list(workspaceId);
+    res.json(configs);
+  };
+
+  get = async (req: Request, res: Response) => {
+    const { workspaceId, key } = req.params;
+    const config = await this.service.get(workspaceId, key);
 
     if (!config) {
       return res.status(404).json({ error: "Config not found" });
@@ -19,16 +27,18 @@ export class ConfigController {
     res.json(config);
   };
 
-  update = async (req: Request, res: Response) => {
-    const { workspaceId } = req.params;
-    const updates = req.body;
+  set = async (req: Request, res: Response) => {
+    const { workspaceId, key } = req.params;
+    const { value } = req.body;
 
-    const config = await this.service.update(workspaceId, updates);
+    const config = await this.service.set(workspaceId, key, value);
+    res.status(201).json(config);
+  };
 
-    if (!config) {
-      return res.status(404).json({ error: "Config not found" });
-    }
+  delete = async (req: Request, res: Response) => {
+    const { workspaceId, key } = req.params;
 
-    res.json(config);
+    await this.service.delete(workspaceId, key);
+    res.status(204).send();
   };
 }

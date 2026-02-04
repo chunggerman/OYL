@@ -8,48 +8,38 @@ export class DocumentController {
     this.service = new DocumentService();
   }
 
-  list = async (req: Request, res: Response) => {
-    const { workspaceId } = req.params;
+  async list(req: Request, res: Response) {
+    const workspaceId = String(req.params.workspaceId);
     const documents = await this.service.list(workspaceId);
     res.json(documents);
-  };
+  }
 
-  get = async (req: Request, res: Response) => {
-    const { id, workspaceId } = req.params;
+  async get(req: Request, res: Response) {
+    const id = String(req.params.id);
+    const workspaceId = String(req.params.workspaceId);
     const document = await this.service.get(id, workspaceId);
-
-    if (!document) {
-      return res.status(404).json({ error: "Document not found" });
-    }
-
     res.json(document);
-  };
+  }
 
-  create = async (req: Request, res: Response) => {
-    const { workspaceId } = req.params;
+  async create(req: Request, res: Response) {
+    const workspaceId = String(req.params.workspaceId);
     const { title, source } = req.body;
-
     const document = await this.service.create(workspaceId, title, source);
-    res.status(201).json(document);
-  };
-
-  update = async (req: Request, res: Response) => {
-    const { id, workspaceId } = req.params;
-    const { title, source } = req.body;
-
-    const document = await this.service.update(id, workspaceId, title, source);
-
-    if (!document) {
-      return res.status(404).json({ error: "Document not found" });
-    }
-
     res.json(document);
-  };
+  }
 
-  delete = async (req: Request, res: Response) => {
-    const { id, workspaceId } = req.params;
+  async update(req: Request, res: Response) {
+    const id = String(req.params.id);
+    const workspaceId = String(req.params.workspaceId);
+    const { title, source } = req.body;
+    const document = await this.service.update(id, workspaceId, title, source);
+    res.json(document);
+  }
 
+  async delete(req: Request, res: Response) {
+    const id = String(req.params.id);
+    const workspaceId = String(req.params.workspaceId);
     await this.service.delete(id, workspaceId);
-    res.status(204).send();
-  };
+    res.json({ deleted: true });
+  }
 }

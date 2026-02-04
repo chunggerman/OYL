@@ -1,43 +1,20 @@
+// backend/src/api/RAGController.ts
+
 import { Request, Response } from "express";
-import { RagCompletionService } from "../services/RagCompletionService";
-import { VectorStoreClient } from "../services/EmbeddingService";
-import { LlmClient } from "../services/LlmClient";
+import { RAGService } from "../services/RAGService";
 
-export class RagController {
-  private ragCompletionService: RagCompletionService;
+export class RAGController {
+  private service: RAGService;
 
-  constructor(vectorStoreClient: VectorStoreClient, llmClient: LlmClient) {
-    this.ragCompletionService = new RagCompletionService(
-      vectorStoreClient,
-      llmClient
-    );
+  constructor() {
+    this.service = new RAGService();
   }
 
-  async complete(req: Request, res: Response): Promise<void> {
-    const { workspaceId, assistantId, query, topK, model, temperature, maxTokens } =
-      req.body;
+  generate = async (req: Request, res: Response) => {
+    const { workspaceId } = req.params;
+    const { query } = req.body;
 
-    if (!workspaceId || !assistantId || !query) {
-      res
-        .status(400)
-        .json({ error: "workspaceId, assistantId and query are required" });
-      return;
-    }
-
-    try {
-      const result = await this.ragCompletionService.complete({
-        workspaceId,
-        assistantId,
-        query,
-        topK,
-        model,
-        temperature,
-        maxTokens,
-      });
-
-      res.json(result);
-    } catch (err: any) {
-      res.status(400).json({ error: err.message ?? "RAG completion failed" });
-    }
-  }
+    const result = await this.service.generate(workspaceId, query);
+    res.json(result);
+  };
 }

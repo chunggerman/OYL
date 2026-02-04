@@ -1,3 +1,5 @@
+// backend/src/api/ThreadController.ts
+
 import { Request, Response } from "express";
 import { ThreadService } from "../services/ThreadService";
 
@@ -38,11 +40,6 @@ export class ThreadController {
     const { title } = req.body;
 
     const thread = await this.service.update(id, workspaceId, title);
-
-    if (!thread) {
-      return res.status(404).json({ error: "Thread not found" });
-    }
-
     res.json(thread);
   };
 

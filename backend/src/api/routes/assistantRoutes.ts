@@ -2,11 +2,20 @@ import { Router } from "express";
 import { AssistantsController } from "../assistantsController";
 
 const router = Router();
-const controller = new AssistantsController();
 
-router.get("/assistants", (req, res) => controller.listAssistants(req, res));
-router.get("/assistants/:id", (req, res) => controller.getAssistant(req, res));
-router.post("/assistants", (req, res) => controller.createAssistant(req, res));
-router.delete("/assistants/:id", (req, res) => controller.deleteAssistant(req, res));
+// Create assistant
+router.post("/assistants", AssistantsController.createAssistant);
+
+// List assistants
+router.get("/assistants", AssistantsController.getAllAssistants);
+
+// Get assistant by ID
+router.get("/assistants/:id", AssistantsController.getAssistantById);
+
+// Update assistant
+router.put("/assistants/:id", AssistantsController.updateAssistant);
+
+// Delete assistant
+router.delete("/assistants/:id", AssistantsController.deleteAssistant);
 
 export default router;

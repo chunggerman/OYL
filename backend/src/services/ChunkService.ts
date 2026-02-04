@@ -1,43 +1,40 @@
-import { ChunkRepository } from "../domain/repositories/ChunkRepository";
-import { Chunk } from "../domain/entities/Chunk";
-import { DocumentRepository } from "../domain/repositories/DocumentRepository";
+// backend/src/services/ChunkService.ts
 
 export class ChunkService {
-  private chunkRepository: ChunkRepository;
-  private documentRepository: DocumentRepository;
-
-  constructor(
-    chunkRepository?: ChunkRepository,
-    documentRepository?: DocumentRepository
-  ) {
-    this.chunkRepository = chunkRepository ?? new ChunkRepository();
-    this.documentRepository = documentRepository ?? new DocumentRepository();
+  constructor() {
+    // Add DB/model clients here later if needed
   }
 
-  async createChunk(params: {
-    documentId: string;
-    position: number;
-    text: string;
-    tagsText?: string[] | null;
-  }): Promise<Chunk> {
-    const document = await this.documentRepository.findById(params.documentId);
-    if (!document) {
-      throw new Error("Document not found");
-    }
-
-    return this.chunkRepository.create({
-      documentId: params.documentId,
-      position: params.position,
-      text: params.text,
-      tagsText: params.tagsText ?? null,
-    });
+  async list(workspaceId: string) {
+    // TODO: replace with real DB query
+    return [];
   }
 
-  async listChunksByDocument(documentId: string): Promise<Chunk[]> {
-    return this.chunkRepository.listByDocument(documentId);
+  async get(id: string, workspaceId: string) {
+    // TODO: replace with real DB query
+    return null;
   }
 
-  async deleteChunksByDocument(documentId: string): Promise<void> {
-    await this.chunkRepository.softDeleteByDocument(documentId);
+  async create(workspaceId: string, content: string) {
+    // TODO: replace with real DB insert
+    return {
+      id: "temp-id",
+      workspaceId,
+      content
+    };
+  }
+
+  async update(id: string, workspaceId: string, content: string) {
+    // TODO: replace with real DB update
+    return {
+      id,
+      workspaceId,
+      content
+    };
+  }
+
+  async delete(id: string, workspaceId: string) {
+    // TODO: replace with real DB delete
+    return;
   }
 }

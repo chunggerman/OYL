@@ -1,26 +1,29 @@
 import { TenantRepository } from "../domain/repositories/TenantRepository";
-import { Tenant } from "../domain/entities/Tenant";
 
 export class TenantService {
-  private tenantRepository: TenantRepository;
+  private repo: TenantRepository;
 
-  constructor(tenantRepository?: TenantRepository) {
-    this.tenantRepository = tenantRepository ?? new TenantRepository();
+  constructor() {
+    this.repo = new TenantRepository();
   }
 
-  async createTenant(name: string, metadataEncrypted: Record<string, any> | null): Promise<Tenant> {
-    return this.tenantRepository.create(name, metadataEncrypted);
+  async createTenant(name: string, metadataEncrypted: Record<string, any> | null) {
+    return this.repo.createTenant(name, metadataEncrypted);
   }
 
-  async getTenantById(id: string): Promise<Tenant | null> {
-    return this.tenantRepository.findById(id);
+  async getAllTenants() {
+    return this.repo.getAllTenants();
   }
 
-  async listTenants(): Promise<Tenant[]> {
-    return this.tenantRepository.list();
+  async getTenantById(id: string) {
+    return this.repo.getTenantById(id);
   }
 
-  async deleteTenant(id: string): Promise<void> {
-    await this.tenantRepository.softDelete(id);
+  async updateTenant(id: string, name: string) {
+    return this.repo.updateTenant(id, name);
+  }
+
+  async deleteTenant(id: string) {
+    return this.repo.deleteTenant(id);
   }
 }

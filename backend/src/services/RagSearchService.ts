@@ -1,68 +1,52 @@
-import { VectorStoreClient } from "./EmbeddingService";
-import { ChunkRepository } from "../domain/repositories/ChunkRepository";
-import { DocumentRepository } from "../domain/repositories/DocumentRepository";
+import { pool } from "../db";
 
 export class RagSearchService {
-  private vectorStoreClient: VectorStoreClient;
-  private chunkRepository: ChunkRepository;
-  private documentRepository: DocumentRepository;
-
-  constructor(
-    vectorStoreClient: VectorStoreClient,
-    chunkRepository?: ChunkRepository,
-    documentRepository?: DocumentRepository
-  ) {
-    this.vectorStoreClient = vectorStoreClient;
-    this.chunkRepository = chunkRepository ?? new ChunkRepository();
-    this.documentRepository = documentRepository ?? new DocumentRepository();
-  }
-
   async search(params: {
     workspaceId: string;
-    query: string;
+    queryEmbedding: number[];
+    tags?: string[];
     topK?: number;
-  }): Promise<
-    Array<{
-      chunkId: string;
-      score: number;
-      text: string;
-      documentId: string;
-      documentTitle: string;
-    }>
-  > {
+  }) {
     const topK = params.topK ?? 8;
 
-    const results = await this.vectorStoreClient.query({
-      workspaceId: params.workspaceId,
-      query: params.query,
-      topK,
-    });
+    const tagFilter =
+      params.tags && params.tags.length > 0
+        ? `
+          AND c.id IN (
+            SELECT ct.chunk_id
+            FROM chunk_tags ct
+            JOIN tags t ON t.id = ct.tag_id
+            WHERE t.workspace_id = $2
+            AND t.name = ANY($4)
+          )
+        `
+        : "";
 
-    const enriched: Array<{
-      chunkId: string;
-      score: number;
-      text: string;
-      documentId: string;
-      documentTitle: string;
-    }> = [];
+    const result = await pool.query(
+      `
+      SELECT
+        c.id AS chunk_id,
+        c.text,
+        c.document_id,
+        d.title AS document_title,
+        1 - (e.embedding <=> $1::vector) AS score
+      FROM embeddings e
+      JOIN chunks c ON c.id = e.chunk_id
+      JOIN documents d ON d.id = c.document_id
+      WHERE d.workspace_id = $2
+      ${tagFilter}
+      ORDER BY e.embedding <=> $1::vector
+      LIMIT $3
+      `,
+      [params.queryEmbedding, params.workspaceId, topK, params.tags ?? []]
+    );
 
-    for (const r of results) {
-      const chunks = await this.chunkRepository.listByDocument(""); // placeholder to reuse mapping
-      const chunk = chunks.find((c) => c.id === r.chunkId);
-      if (!chunk) continue;
-
-      const document = await this.documentRepository.findById(chunk.documentId);
-      if (!document) continue;
-
-      enriched.push({
-        chunkId: chunk.id,
-        score: r.score,
-        text: chunk.text,
-        documentId: document.id,
-        documentTitle: document.title,
-      });
-    }
-
-    return enriched;
+    return result.rows.map((row) => ({
+      chunkId: row.chunk_id,
+      text: row.text,
+      documentId: row.document_id,
+      documentTitle: row.document_title,
+      score: row.score,
+    }));
   }
 }

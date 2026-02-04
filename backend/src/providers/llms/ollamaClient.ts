@@ -1,49 +1,27 @@
-import { LlmClient } from "../../services/LlmClient";
+import { EmbeddingModelClient } from "../../services/EmbeddingService";
 
-export class OllamaLlmClient implements LlmClient {
+export class OllamaEmbeddingClient implements EmbeddingModelClient {
   private baseUrl: string;
 
   constructor(baseUrl = "http://localhost:11434") {
     this.baseUrl = baseUrl;
   }
 
-  async complete(params: {
-    model: string;
-    prompt: string;
-    temperature?: number;
-    maxTokens?: number;
-  }): Promise<{ completion: string }> {
-    const response = await fetch(`${this.baseUrl}/api/generate`, {
+  async embed(text: string): Promise<number[]> {
+    const response = await fetch(`${this.baseUrl}/api/embeddings`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: params.model,
-        prompt: params.prompt,
-        options: {
-          temperature: params.temperature ?? 0.2,
-          num_predict: params.maxTokens ?? 512,
-        },
+        model: "nomic-embed-text",
+        prompt: text,
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`Ollama LLM error: ${response.statusText}`);
+      throw new Error(`Ollama embedding error: ${response.statusText}`);
     }
 
-    let fullText = "";
-    for await (const chunk of response.body as any) {
-      const text = new TextDecoder().decode(chunk);
-      const lines = text.trim().split("\n");
-      for (const line of lines) {
-        try {
-          const json = JSON.parse(line);
-          if (json.response) fullText += json.response;
-        } catch {
-          continue;
-        }
-      }
-    }
-
-    return { completion: fullText.trim() };
+    const json = await response.json();
+    return json.embedding;
   }
 }

@@ -1,63 +1,33 @@
-import { EmbeddingRepository } from "../domain/repositories/EmbeddingRepository";
-import { ChunkRepository } from "../domain/repositories/ChunkRepository";
-import { Embedding } from "../domain/entities/Embedding";
-
-export interface VectorStoreClient {
-  upsertEmbedding(params: {
-    workspaceId: string;
-    documentId: string;
-    chunkId: string;
-    text: string;
-  }): Promise<string>;
-
-  query(params: {
-    workspaceId: string;
-    query: string;
-    topK: number;
-  }): Promise<
-    Array<{
-      chunkId: string;
-      score: number;
-    }>
-  >;
-}
+// backend/src/services/EmbeddingService.ts
 
 export class EmbeddingService {
-  private embeddingRepository: EmbeddingRepository;
-  private chunkRepository: ChunkRepository;
-  private vectorStoreClient: VectorStoreClient;
-
-  constructor(
-    vectorStoreClient: VectorStoreClient,
-    embeddingRepository?: EmbeddingRepository,
-    chunkRepository?: ChunkRepository
-  ) {
-    this.vectorStoreClient = vectorStoreClient;
-    this.embeddingRepository = embeddingRepository ?? new EmbeddingRepository();
-    this.chunkRepository = chunkRepository ?? new ChunkRepository();
+  constructor() {
+    // No dependencies required for now.
+    // Add modelClient or DB clients here later when needed.
   }
 
-  async createEmbeddingForChunk(params: {
-    workspaceId: string;
-    documentId: string;
-    chunkId: string;
-  }): Promise<Embedding> {
-    const chunk = await this.chunkRepository.listByDocument(params.documentId);
-    const target = chunk.find((c) => c.id === params.chunkId);
-    if (!target) {
-      throw new Error("Chunk not found for embedding");
-    }
+  async listByChunk(chunkId: string, workspaceId: string) {
+    // TODO: replace with real DB query
+    return [];
+  }
 
-    const vectorRef = await this.vectorStoreClient.upsertEmbedding({
-      workspaceId: params.workspaceId,
-      documentId: params.documentId,
-      chunkId: params.chunkId,
-      text: target.text,
-    });
+  async get(id: string, workspaceId: string) {
+    // TODO: replace with real DB query
+    return null;
+  }
 
-    return this.embeddingRepository.create({
-      chunkId: params.chunkId,
-      vectorRef,
-    });
+  async create(workspaceId: string, chunkId: string, vector: number[]) {
+    // TODO: replace with real DB insert
+    return {
+      id: "temp-id",
+      workspaceId,
+      chunkId,
+      vector
+    };
+  }
+
+  async delete(id: string, workspaceId: string) {
+    // TODO: replace with real DB delete
+    return;
   }
 }

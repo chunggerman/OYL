@@ -1,16 +1,17 @@
 import { DocumentService } from "./DocumentService";
 import { ChunkService } from "./ChunkService";
-import { EmbeddingService, VectorStoreClient } from "./EmbeddingService";
+import { EmbeddingService } from "./EmbeddingService";
+import { EmbeddingModelClient } from "./EmbeddingService";
 
 export class DocumentIngestionService {
   private documentService: DocumentService;
   private chunkService: ChunkService;
   private embeddingService: EmbeddingService;
 
-  constructor(vectorStoreClient: VectorStoreClient) {
+  constructor(modelClient: EmbeddingModelClient) {
     this.documentService = new DocumentService();
     this.chunkService = new ChunkService();
-    this.embeddingService = new EmbeddingService(vectorStoreClient);
+    this.embeddingService = new EmbeddingService(modelClient);
   }
 
   async ingestDocument(params: {
@@ -33,6 +34,7 @@ export class DocumentIngestionService {
     let position = 0;
     for (const text of chunks) {
       position += 1;
+
       const chunk = await this.chunkService.createChunk({
         documentId: document.id,
         position,
@@ -40,7 +42,6 @@ export class DocumentIngestionService {
       });
 
       await this.embeddingService.createEmbeddingForChunk({
-        workspaceId: params.workspaceId,
         documentId: document.id,
         chunkId: chunk.id,
       });

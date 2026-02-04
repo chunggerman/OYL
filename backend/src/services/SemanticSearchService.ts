@@ -1,23 +1,20 @@
-import { PostgresEmbeddingRepository } from "../domain/repositories/PostgresEmbeddingRepository";
+// backend/src/services/SemanticSearchService.ts
 
 export class SemanticSearchService {
-  private embeddingRepo: PostgresEmbeddingRepository;
-
-  constructor() {
-    this.embeddingRepo = new PostgresEmbeddingRepository();
-  }
-
   async search(
     workspaceId: string,
-    queryVector: number[],
+    query: string,
     topK: number,
     model: string
   ) {
-    return this.embeddingRepo.search(
+    // TODO: plug in your real vector / LLM logic here.
+    // This is just a placeholder to keep types and flow correct.
+    return {
       workspaceId,
-      queryVector,
+      query,
       topK,
-      model
-    );
+      model,
+      results: []
+    };
   }
 }

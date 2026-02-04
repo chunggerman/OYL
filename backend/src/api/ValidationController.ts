@@ -1,3 +1,5 @@
+// backend/src/api/ValidationController.ts
+
 import { Request, Response } from "express";
 import { ValidationService } from "../services/ValidationService";
 
@@ -8,9 +10,9 @@ export class ValidationController {
     this.service = new ValidationService();
   }
 
-  listByChunk = async (req: Request, res: Response) => {
-    const { chunkId, workspaceId } = req.params;
-    const validations = await this.service.listByChunk(chunkId, workspaceId);
+  list = async (req: Request, res: Response) => {
+    const { workspaceId } = req.params;
+    const validations = await this.service.list(workspaceId);
     res.json(validations);
   };
 
@@ -26,35 +28,11 @@ export class ValidationController {
   };
 
   create = async (req: Request, res: Response) => {
-    const { chunkId, workspaceId } = req.params;
-    const { status, notes } = req.body;
+    const { workspaceId } = req.params;
+    const { input } = req.body;
 
-    const validation = await this.service.create(
-      workspaceId,
-      chunkId,
-      status,
-      notes
-    );
-
+    const validation = await this.service.create(workspaceId, input);
     res.status(201).json(validation);
-  };
-
-  update = async (req: Request, res: Response) => {
-    const { id, workspaceId } = req.params;
-    const { status, notes } = req.body;
-
-    const validation = await this.service.update(
-      id,
-      workspaceId,
-      status,
-      notes
-    );
-
-    if (!validation) {
-      return res.status(404).json({ error: "Validation not found" });
-    }
-
-    res.json(validation);
   };
 
   delete = async (req: Request, res: Response) => {

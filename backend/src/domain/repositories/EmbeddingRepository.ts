@@ -4,30 +4,43 @@ import { Embedding } from "../entities/Embedding";
 export class EmbeddingRepository {
   async create(params: {
     chunkId: string;
-    vectorRef: string;
+    vector: number[];
   }): Promise<Embedding> {
     const result = await pool.query(
       `
-      INSERT INTO embeddings (id, chunk_id, vector_ref)
+      INSERT INTO embeddings (id, chunk_id, embedding)
       VALUES (gen_random_uuid(), $1, $2)
-      RETURNING id, chunk_id, vector_ref, created_at
+      RETURNING id, chunk_id, embedding, created_at
       `,
-      [params.chunkId, params.vectorRef]
+      [params.chunkId, params.vector]
     );
-    return this.mapRow(result.rows[0]);
+
+    return {
+      id: result.rows[0].id,
+      chunkId: result.rows[0].chunk_id,
+      vector: result.rows[0].embedding,
+      createdAt: result.rows[0].created_at,
+    };
   }
 
   async findByChunkId(chunkId: string): Promise<Embedding | null> {
     const result = await pool.query(
       `
-      SELECT id, chunk_id, vector_ref, created_at
+      SELECT id, chunk_id, embedding, created_at
       FROM embeddings
       WHERE chunk_id = $1
       `,
       [chunkId]
     );
+
     if (result.rowCount === 0) return null;
-    return this.mapRow(result.rows[0]);
+
+    return {
+      id: result.rows[0].id,
+      chunkId: result.rows[0].chunk_id,
+      vector: result.rows[0].embedding,
+      createdAt: result.rows[0].created_at,
+    };
   }
 
   async deleteByChunkId(chunkId: string): Promise<void> {
@@ -38,14 +51,5 @@ export class EmbeddingRepository {
       `,
       [chunkId]
     );
-  }
-
-  private mapRow(row: any): Embedding {
-    return {
-      id: row.id,
-      chunkId: row.chunk_id,
-      vectorRef: row.vector_ref,
-      createdAt: row.created_at,
-    };
   }
 }

@@ -1,125 +1,68 @@
-import { pool } from "../db";
-import { VectorStoreClient } from "./EmbeddingService";
+import { RagSearchService } from "./RagSearchService";
+import { EmbeddingModelClient } from "./EmbeddingService";
 import { LlmClient } from "./LlmClient";
 import { AssistantService } from "./AssistantService";
 
-interface RagCompletionParams {
-  workspaceId: string;
-  assistantId: string;
-  query: string;
-  topK?: number;
-  model?: string;
-  temperature?: number;
-  maxTokens?: number;
-}
-
 export class RagCompletionService {
-  private vectorStoreClient: VectorStoreClient;
-  private llmClient: LlmClient;
-  private assistantService: AssistantService;
+  private search: RagSearchService;
+  private embedder: EmbeddingModelClient;
+  private llm: LlmClient;
+  private assistants: AssistantService;
 
-  constructor(vectorStoreClient: VectorStoreClient, llmClient: LlmClient) {
-    this.vectorStoreClient = vectorStoreClient;
-    this.llmClient = llmClient;
-    this.assistantService = new AssistantService();
+  constructor(
+    embedder: EmbeddingModelClient,
+    llm: LlmClient
+  ) {
+    this.search = new RagSearchService();
+    this.embedder = embedder;
+    this.llm = llm;
+    this.assistants = new AssistantService();
   }
 
-  async complete(params: RagCompletionParams): Promise<{
-    answer: string;
-    context: Array<{
-      chunkId: string;
-      text: string;
-      documentId: string;
-      documentTitle: string;
-      score: number;
-    }>;
-  }> {
-    const assistant = await this.assistantService.getAssistantById(
-      params.assistantId
-    );
-    if (!assistant) {
-      throw new Error("Assistant not found");
-    }
-    if (assistant.workspaceId !== params.workspaceId) {
-      throw new Error("Assistant does not belong to workspace");
-    }
+  async complete(params: {
+    workspaceId: string;
+    assistantId: string;
+    query: string;
+    model?: string;
+    temperature?: number;
+    maxTokens?: number;
+  }) {
+    const assistant = await this.assistants.getAssistantById(params.assistantId);
+    if (!assistant) throw new Error("Assistant not found");
 
-    const topK = params.topK ?? 8;
+    const queryEmbedding = await this.embedder.embed(params.query);
 
-    const vectorResults = await this.vectorStoreClient.query({
+    const context = await this.search.search({
       workspaceId: params.workspaceId,
-      query: params.query,
-      topK,
+      queryEmbedding,
+      topK: 8,
     });
-
-    const context: Array<{
-      chunkId: string;
-      text: string;
-      documentId: string;
-      documentTitle: string;
-      score: number;
-    }> = [];
-
-    for (const r of vectorResults) {
-      const chunkRow = await pool.query(
-        `
-        SELECT c.id, c.text, c.document_id, d.title
-        FROM chunks c
-        JOIN documents d ON d.id = c.document_id
-        WHERE c.id = $1 AND c.deleted_at IS NULL AND d.deleted_at IS NULL
-        `,
-        [r.chunkId]
-      );
-      if (chunkRow.rowCount === 0) continue;
-      const row = chunkRow.rows[0];
-      context.push({
-        chunkId: row.id,
-        text: row.text,
-        documentId: row.document_id,
-        documentTitle: row.title,
-        score: r.score,
-      });
-    }
-
-    const systemInstructionParts: string[] = [];
-    if (assistant.instruction) {
-      systemInstructionParts.push(assistant.instruction);
-    }
-    if (assistant.aiInstruction) {
-      systemInstructionParts.push(assistant.aiInstruction);
-    }
-    const systemInstruction = systemInstructionParts.join("\n\n");
 
     const contextText = context
       .map(
-        (c, idx) =>
-          `[#${idx + 1} | score=${c.score.toFixed(
-            3
-          )} | doc=${c.documentTitle}]\n${c.text}`
+        (c, i) =>
+          `[#${i + 1} | score=${c.score.toFixed(3)} | doc=${c.documentTitle}]\n${c.text}`
       )
       .join("\n\n");
 
-    const prompt = [
-      systemInstruction
-        ? `You are an assistant with the following instructions:\n${systemInstruction}`
-        : `You are a helpful assistant.`,
-      `You are given the following context chunks from the knowledge base:`,
-      contextText || "(no relevant context found)",
-      `User question:\n${params.query}`,
-      `Using only the information in the context when possible, answer the user's question clearly and concisely.`,
-    ]
-      .filter(Boolean)
-      .join("\n\n");
+    const prompt = `
+${assistant.instruction ?? ""}
+${assistant.aiInstruction ?? ""}
 
-    const model = params.model ?? "gpt-4.1-mini";
-    const temperature = params.temperature ?? 0.2;
-    const maxTokens = params.maxTokens ?? 512;
+Context:
+${contextText}
 
-    const completion = await this.llmClient.complete({
-      model,
+User:
+${params.query}
+
+Answer using only the context when possible.
+`;
+
+    const completion = await this.llm.complete({
+      model: params.model ?? "gpt-4.1-mini",
       prompt,
-      temperature,
-      maxTokens,
+      temperature: params.temperature ?? 0.2,
+      maxTokens: params.maxTokens ?? 512,
     });
 
     return {

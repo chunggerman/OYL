@@ -1,12 +1,24 @@
 import express from "express";
-import routes from "./api/routes";
+import cors from "cors";
+import bodyParser from "body-parser";
+import IndexRouter from "./api/routes/IndexRouter";
+import ErrorRouter from "./api/routes/ErrorRouter";
 
 const app = express();
-app.use(express.json());
 
-app.use(routes);
+// Middleware
+app.use(cors());
+app.use(bodyParser.json({ limit: "10mb" }));
+app.use(bodyParser.urlencoded({ extended: true }));
 
-const port = process.env.PORT ?? 3000;
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+// Mount ALL API routes under the unified index router
+app.use("/", IndexRouter);
+
+// Global error handler (must be last)
+app.use(ErrorRouter);
+
+// Server start
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Backend server running on port ${PORT}`);
 });

@@ -1,9 +1,7 @@
-export type TagSource = "BUILDER" | "AI";
-
 export interface Tag {
   id: string;
-  referenceId: string;
-  tag: string;
-  source: TagSource;
+  workspaceId: string;
+  name: string;
+  description: string | null;
   createdAt: Date;
 }

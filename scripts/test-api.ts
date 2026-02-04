@@ -1,6 +1,6 @@
 
 import express from "express";
-import api from "../backend/src/api";
+import api from "../backend/src/api/index.ts.old";
 import dotenv from "dotenv";
 dotenv.config();
 

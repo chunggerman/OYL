@@ -1,13 +1,21 @@
+// backend/src/api/routes/ValidationRouter.ts
+
 import { Router } from "express";
 import { ValidationController } from "../ValidationController";
 
 const router = Router();
 const controller = new ValidationController();
 
-router.get("/", controller.list);
-router.get("/:id", controller.get);
-router.post("/", controller.create);
-router.put("/:id", controller.update);
-router.delete("/:id", controller.delete);
+// List validations
+router.get("/:workspaceId", controller.list);
+
+// Get one validation
+router.get("/:workspaceId/:id", controller.get);
+
+// Create validation
+router.post("/:workspaceId", controller.create);
+
+// Delete validation
+router.delete("/:workspaceId/:id", controller.delete);
 
 export default router;

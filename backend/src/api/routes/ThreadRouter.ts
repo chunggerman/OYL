@@ -1,13 +1,24 @@
+// backend/src/api/routes/ThreadRouter.ts
+
 import { Router } from "express";
 import { ThreadController } from "../ThreadController";
 
 const router = Router();
 const controller = new ThreadController();
 
-router.get("/", controller.list);
-router.get("/:id", controller.get);
-router.post("/", controller.create);
-router.put("/:id", controller.update);
-router.delete("/:id", controller.delete);
+// List threads
+router.get("/:workspaceId", controller.list);
+
+// Get one thread
+router.get("/:workspaceId/:id", controller.get);
+
+// Create thread
+router.post("/:workspaceId", controller.create);
+
+// Update thread
+router.put("/:workspaceId/:id", controller.update);
+
+// Delete thread
+router.delete("/:workspaceId/:id", controller.delete);
 
 export default router;

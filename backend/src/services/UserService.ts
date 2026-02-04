@@ -1,4 +1,4 @@
-import { PostgresUserRepository } from "../repositories/PostgresUserRepository";
+import { PostgresUserRepository } from "../domain/repositories/PostgresUserRepository";
 
 export class UserService {
   private repo: PostgresUserRepository;
@@ -8,35 +8,22 @@ export class UserService {
   }
 
   async list(tenantId: string) {
-    return this.repo.listByTenant(tenantId);
+    return this.repo.list(tenantId);
   }
 
   async get(id: string, tenantId: string) {
-    return this.repo.getById(id, tenantId);
+    return this.repo.get(id, tenantId);
   }
 
-  async getByEmail(email: string, tenantId: string) {
-    return this.repo.getByEmail(email, tenantId);
+  async create(email: string, name: string | null, tenantId: string) {
+    return this.repo.create(email, name, tenantId);
   }
 
-  async create(
-    tenantId: string,
-    email: string,
-    name: string | null
-  ) {
-    return this.repo.create(tenantId, email, name);
-  }
-
-  async update(
-    id: string,
-    tenantId: string,
-    email: string,
-    name: string | null
-  ) {
-    return this.repo.update(id, tenantId, email, name);
+  async update(id: string, email: string, name: string | null, tenantId: string) {
+    return this.repo.update(id, email, name, tenantId);
   }
 
   async delete(id: string, tenantId: string) {
-    await this.repo.delete(id, tenantId);
+    return this.repo.delete(id, tenantId);
   }
 }
