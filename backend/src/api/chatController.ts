@@ -1,47 +1,34 @@
 import { Request, Response } from "express";
 import { ChatService } from "../services/ChatService";
-import { VectorStoreClient } from "../services/EmbeddingService";
-import { LlmClient } from "../services/LlmClient";
-import { FileConversationMemory } from "../providers/memory/FileConversationMemory";
+import { PostgresChatRepository } from "../domain/repositories/PostgresChatRepository";
 
-export class ChatController {
-  private chat: ChatService;
+const service = new ChatService(new PostgresChatRepository());
 
-  constructor(vectorStoreClient: VectorStoreClient, llmClient: LlmClient) {
-    this.chat = new ChatService(
-      vectorStoreClient,
-      llmClient,
-      new FileConversationMemory()
-    );
-  }
+export default class ChatController {
+  listByUser = async (req: Request, res: Response) => {
+    const items = await service.listByUser(req.params.userId);
+    res.json({ items });
+  };
 
-  async handle(req: Request, res: Response): Promise<void> {
-    const {
-      conversationId,
-      workspaceId,
-      assistantId,
-      userMessage,
-      knownFields,
-      model,
-    } = req.body;
+  create = async (req: Request, res: Response) => {
+    const item = await service.create(req.body);
+    res.status(201).json(item);
+  };
 
-    if (!conversationId || !workspaceId || !assistantId || !userMessage) {
-      res.status(400).json({
-        error:
-          "conversationId, workspaceId, assistantId, and userMessage are required",
-      });
-      return;
-    }
+  get = async (req: Request, res: Response) => {
+    const item = await service.get(req.params.id);
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
+  };
 
-    const result = await this.chat.handleMessage({
-      conversationId,
-      workspaceId,
-      assistantId,
-      userMessage,
-      knownFields,
-      model,
-    });
+  update = async (req: Request, res: Response) => {
+    const item = await service.update(req.params.id, req.body);
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
+  };
 
-    res.json(result);
-  }
+  delete = async (req: Request, res: Response) => {
+    await service.delete(req.params.id);
+    res.status(204).send();
+  };
 }

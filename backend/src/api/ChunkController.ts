@@ -1,52 +1,34 @@
-// backend/src/api/ChunkController.ts
-
 import { Request, Response } from "express";
 import { ChunkService } from "../services/ChunkService";
+import { PostgresChunkRepository } from "../domain/repositories/PostgresChunkRepository";
 
-export class ChunkController {
-  private service: ChunkService;
+const service = new ChunkService(new PostgresChunkRepository());
 
-  constructor() {
-    this.service = new ChunkService();
-  }
-
-  list = async (req: Request, res: Response) => {
-    const { workspaceId } = req.params;
-    const chunks = await this.service.list(workspaceId);
-    res.json(chunks);
-  };
-
-  get = async (req: Request, res: Response) => {
-    const { id, workspaceId } = req.params;
-    const chunk = await this.service.get(id, workspaceId);
-
-    if (!chunk) {
-      return res.status(404).json({ error: "Chunk not found" });
-    }
-
-    res.json(chunk);
+export default class ChunkController {
+  listByDatasource = async (req: Request, res: Response) => {
+    const items = await service.listByDatasource(req.params.datasourceId);
+    res.json({ items });
   };
 
   create = async (req: Request, res: Response) => {
-    const { workspaceId } = req.params;
-    const { content } = req.body;
+    const item = await service.create(req.body);
+    res.status(201).json(item);
+  };
 
-    const chunk = await this.service.create(workspaceId, content);
-    res.status(201).json(chunk);
+  get = async (req: Request, res: Response) => {
+    const item = await service.get(req.params.id);
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
   };
 
   update = async (req: Request, res: Response) => {
-    const { id, workspaceId } = req.params;
-    const { content } = req.body;
-
-    const chunk = await this.service.update(id, workspaceId, content);
-    res.json(chunk);
+    const item = await service.update(req.params.id, req.body);
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
   };
 
   delete = async (req: Request, res: Response) => {
-    const { id, workspaceId } = req.params;
-
-    await this.service.delete(id, workspaceId);
+    await service.delete(req.params.id);
     res.status(204).send();
   };
 }

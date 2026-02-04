@@ -1,24 +1,13 @@
-// backend/src/api/routes/TagRouter.ts
-
 import { Router } from "express";
-import { TagController } from "../TagController";
+import TagController from "../TagController";
 
 const router = Router();
 const controller = new TagController();
 
-// List tags
-router.get("/:workspaceId", controller.list);
-
-// Get one tag
-router.get("/:workspaceId/:id", controller.get);
-
-// Create tag
-router.post("/:workspaceId", controller.create);
-
-// Update tag
-router.put("/:workspaceId/:id", controller.update);
-
-// Delete tag
-router.delete("/:workspaceId/:id", controller.delete);
+router.get("/workspace/:workspaceId", controller.listByWorkspace);
+router.post("/", controller.create);
+router.get("/:id", controller.get);
+router.put("/:id", controller.update);
+router.delete("/:id", controller.delete);
 
 export default router;

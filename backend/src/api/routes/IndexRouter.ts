@@ -1,48 +1,46 @@
 import { Router } from "express";
-
-import AuthRouter from "./AuthRouter";
+import AssistantRouter from "./AssistantRouter";
+// import AuthRouter from "./AuthRouter";
+import ChatRouter from "./ChatRouter";
 import ChunkRouter from "./ChunkRouter";
 import ConfigRouter from "./ConfigRouter";
-import DocumentRouter from "./DocumentRouter";
+import DatasourceRouter from "./DatasourceRouter";
 import EmbeddingRouter from "./EmbeddingRouter";
-import ErrorRouter from "./ErrorRouter";
 import FileUploadRouter from "./FileUploadRouter";
 import HealthRouter from "./HealthRouter";
-import LLMRouter from "./LLMRouter";
+import IngestionRouter from "./IngestionRouter";
+import IntegrationRouter from "./IntegrationRouter";
 import MessageRouter from "./MessageRouter";
 import RAGRouter from "./RAGRouter";
+import ReferenceRouter from "./ReferenceRouter";
 import SemanticSearchRouter from "./SemanticSearchRouter";
 import TagRouter from "./TagRouter";
 import ThreadRouter from "./ThreadRouter";
 import UserRouter from "./UserRouter";
-import ValidationRouter from "./ValidationRouter";
 import WorkspaceRouter from "./WorkspaceRouter";
-import tenantRoutes from "./tenantRoutes";
+import TenantRouter from "./TenantRouter";
 
-const router = Router();
+const IndexRouter = Router();
 
-// Health first
-router.use("/health", HealthRouter);
+IndexRouter.use("/assistants", AssistantRouter);
+// IndexRouter.use("/auth", AuthRouter);
+IndexRouter.use("/chats", ChatRouter);
+IndexRouter.use("/chunks", ChunkRouter);
+IndexRouter.use("/configs", ConfigRouter);
+IndexRouter.use("/datasources", DatasourceRouter);
+IndexRouter.use("/embeddings", EmbeddingRouter);
+IndexRouter.use("/files", FileUploadRouter);
+IndexRouter.use("/health", HealthRouter);
+IndexRouter.use("/ingestions", IngestionRouter);
+IndexRouter.use("/integrations", IntegrationRouter);
+IndexRouter.use("/messages", MessageRouter);
+IndexRouter.use("/rag", RAGRouter);
+IndexRouter.use("/references", ReferenceRouter);
+IndexRouter.use("/semantic-search", SemanticSearchRouter);
+IndexRouter.use("/tags", TagRouter);
+IndexRouter.use("/threads", ThreadRouter);
+IndexRouter.use("/users", UserRouter);
+IndexRouter.use("/workspaces", WorkspaceRouter);
+IndexRouter.use("/tenants", TenantRouter);
 
-// Core domain routes
-router.use("/auth", AuthRouter);
-router.use("/chunks", ChunkRouter);
-router.use("/config", ConfigRouter);
-router.use("/documents", DocumentRouter);
-router.use("/embeddings", EmbeddingRouter);
-router.use("/errors", ErrorRouter);
-router.use("/upload", FileUploadRouter);
-router.use("/llm", LLMRouter);
-router.use("/messages", MessageRouter);
-router.use("/rag", RAGRouter);
-router.use("/semantic-search", SemanticSearchRouter);
-router.use("/tags", TagRouter);
-router.use("/threads", ThreadRouter);
-router.use("/users", UserRouter);
-router.use("/validation", ValidationRouter);
-router.use("/workspaces", WorkspaceRouter);
-
-// Tenants
-router.use("/tenants", tenantRoutes);
-
-export default router;
+export default IndexRouter;

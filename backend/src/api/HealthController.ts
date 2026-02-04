@@ -1,15 +1,15 @@
 import { Request, Response } from "express";
+import { HealthService } from "../services/HealthService";
 
-export class HealthController {
-  ping = async (_req: Request, res: Response) => {
-    res.json({ status: "ok" });
-  };
+const service = new HealthService();
 
-  deep = async (_req: Request, res: Response) => {
+export default class HealthController {
+  check = async (_req: Request, res: Response) => {
+    const result = await service.check();
     res.json({
-      status: "ok",
-      uptime: process.uptime(),
-      timestamp: Date.now()
+      service: "backend",
+      ...result,
+      timestamp: new Date().toISOString(),
     });
   };
 }

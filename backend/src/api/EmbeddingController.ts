@@ -1,49 +1,39 @@
-// backend/src/api/EmbeddingController.ts
-
 import { Request, Response } from "express";
 import { EmbeddingService } from "../services/EmbeddingService";
+import { PostgresEmbeddingRepository } from "../domain/repositories/PostgresEmbeddingRepository";
 
-export class EmbeddingController {
-  private service: EmbeddingService;
+const service = new EmbeddingService(new PostgresEmbeddingRepository());
 
-  constructor() {
-    this.service = new EmbeddingService();
-  }
-
+export default class EmbeddingController {
   listByChunk = async (req: Request, res: Response) => {
-    const { chunkId, workspaceId } = req.params;
-    const embeddings = await this.service.listByChunk(chunkId, workspaceId);
-    res.json(embeddings);
+    const items = await service.listByChunk(req.params.chunkId);
+    res.json({ items });
   };
 
-  get = async (req: Request, res: Response) => {
-    const { id, workspaceId } = req.params;
-    const embedding = await this.service.get(id, workspaceId);
-
-    if (!embedding) {
-      return res.status(404).json({ error: "Embedding not found" });
-    }
-
-    res.json(embedding);
+  listByMessage = async (req: Request, res: Response) => {
+    const items = await service.listByMessage(req.params.messageId);
+    res.json({ items });
   };
 
   create = async (req: Request, res: Response) => {
-    const { chunkId, workspaceId } = req.params;
-    const { vector } = req.body;
+    const item = await service.create(req.body);
+    res.status(201).json(item);
+  };
 
-    const embedding = await this.service.create(
-      workspaceId,
-      chunkId,
-      vector
-    );
+  get = async (req: Request, res: Response) => {
+    const item = await service.get(req.params.id);
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
+  };
 
-    res.status(201).json(embedding);
+  update = async (req: Request, res: Response) => {
+    const item = await service.update(req.params.id, req.body);
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
   };
 
   delete = async (req: Request, res: Response) => {
-    const { id, workspaceId } = req.params;
-
-    await this.service.delete(id, workspaceId);
+    await service.delete(req.params.id);
     res.status(204).send();
   };
 }

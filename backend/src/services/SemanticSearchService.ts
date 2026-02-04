@@ -1,20 +1,30 @@
-// backend/src/services/SemanticSearchService.ts
+import {
+  SemanticSearch,
+  CreateSemanticSearchInput,
+  UpdateSemanticSearchInput,
+} from "../domain/entities/SemanticSearch";
+import { SemanticSearchRepository } from "../domain/repositories/SemanticSearchRepository";
 
 export class SemanticSearchService {
-  async search(
-    workspaceId: string,
-    query: string,
-    topK: number,
-    model: string
-  ) {
-    // TODO: plug in your real vector / LLM logic here.
-    // This is just a placeholder to keep types and flow correct.
-    return {
-      workspaceId,
-      query,
-      topK,
-      model,
-      results: []
-    };
+  constructor(private readonly repo: SemanticSearchRepository) {}
+
+  list(): Promise<SemanticSearch[]> {
+    return this.repo.list();
+  }
+
+  create(input: CreateSemanticSearchInput): Promise<SemanticSearch> {
+    return this.repo.create(input);
+  }
+
+  get(id: string): Promise<SemanticSearch | null> {
+    return this.repo.getById(id);
+  }
+
+  update(id: string, input: UpdateSemanticSearchInput): Promise<SemanticSearch | null> {
+    return this.repo.update(id, input);
+  }
+
+  delete(id: string): Promise<void> {
+    return this.repo.delete(id);
   }
 }

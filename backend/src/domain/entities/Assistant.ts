@@ -1,11 +1,17 @@
 export interface Assistant {
   id: string;
-  workspaceId: string;
   name: string;
-  instruction: string | null;
-  aiInstruction: string | null;
-  settingsJson: Record<string, any> | null;
+  description: string | null;
   createdAt: Date;
   updatedAt: Date;
-  deletedAt: Date | null;
+}
+
+export interface CreateAssistantInput {
+  name: string;
+  description?: string | null;
+}
+
+export interface UpdateAssistantInput {
+  name?: string;
+  description?: string | null;
 }

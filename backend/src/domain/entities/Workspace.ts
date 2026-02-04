@@ -1,9 +1,19 @@
 export interface Workspace {
   id: string;
-  tenantId: string;
+  ownerId: string;
   name: string;
-  description: string | null;
+  metadata: any | null;
   createdAt: Date;
   updatedAt: Date;
-  deletedAt: Date | null;
+}
+
+export interface CreateWorkspaceInput {
+  ownerId: string;
+  name: string;
+  metadata?: any | null;
+}
+
+export interface UpdateWorkspaceInput {
+  name?: string;
+  metadata?: any | null;
 }

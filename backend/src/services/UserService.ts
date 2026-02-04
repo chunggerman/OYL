@@ -1,29 +1,34 @@
-import { PostgresUserRepository } from "../domain/repositories/PostgresUserRepository";
+import {
+  User,
+  CreateUserInput,
+  UpdateUserInput,
+} from "../domain/entities/User";
+import { UserRepository } from "../domain/repositories/UserRepository";
 
 export class UserService {
-  private repo: PostgresUserRepository;
+  constructor(private readonly repo: UserRepository) {}
 
-  constructor() {
-    this.repo = new PostgresUserRepository();
+  list(): Promise<User[]> {
+    return this.repo.list();
   }
 
-  async list(tenantId: string) {
-    return this.repo.list(tenantId);
+  create(input: CreateUserInput): Promise<User> {
+    return this.repo.create(input);
   }
 
-  async get(id: string, tenantId: string) {
-    return this.repo.get(id, tenantId);
+  get(id: string): Promise<User | null> {
+    return this.repo.getById(id);
   }
 
-  async create(email: string, name: string | null, tenantId: string) {
-    return this.repo.create(email, name, tenantId);
+  getByEmail(email: string): Promise<User | null> {
+    return this.repo.getByEmail(email);
   }
 
-  async update(id: string, email: string, name: string | null, tenantId: string) {
-    return this.repo.update(id, email, name, tenantId);
+  update(id: string, input: UpdateUserInput): Promise<User | null> {
+    return this.repo.update(id, input);
   }
 
-  async delete(id: string, tenantId: string) {
-    return this.repo.delete(id, tenantId);
+  delete(id: string): Promise<void> {
+    return this.repo.delete(id);
   }
 }

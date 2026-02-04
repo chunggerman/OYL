@@ -1,29 +1,30 @@
+import {
+  Tenant,
+  CreateTenantInput,
+  UpdateTenantInput,
+} from "../domain/entities/Tenant";
 import { TenantRepository } from "../domain/repositories/TenantRepository";
 
 export class TenantService {
-  private repo: TenantRepository;
+  constructor(private readonly repo: TenantRepository) {}
 
-  constructor() {
-    this.repo = new TenantRepository();
+  listByOwner(ownerId: string): Promise<Tenant[]> {
+    return this.repo.listByOwner(ownerId);
   }
 
-  async createTenant(name: string, metadataEncrypted: Record<string, any> | null) {
-    return this.repo.createTenant(name, metadataEncrypted);
+  create(input: CreateTenantInput): Promise<Tenant> {
+    return this.repo.create(input);
   }
 
-  async getAllTenants() {
-    return this.repo.getAllTenants();
+  get(id: string): Promise<Tenant | null> {
+    return this.repo.getById(id);
   }
 
-  async getTenantById(id: string) {
-    return this.repo.getTenantById(id);
+  update(id: string, input: UpdateTenantInput): Promise<Tenant | null> {
+    return this.repo.update(id, input);
   }
 
-  async updateTenant(id: string, name: string) {
-    return this.repo.updateTenant(id, name);
-  }
-
-  async deleteTenant(id: string) {
-    return this.repo.deleteTenant(id);
+  delete(id: string): Promise<void> {
+    return this.repo.delete(id);
   }
 }

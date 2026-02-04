@@ -1,9 +1,9 @@
 import { Router } from "express";
+import HealthController from "../HealthController";
 
 const router = Router();
+const controller = new HealthController();
 
-router.get("/", (_req, res) => {
-  res.status(200).json({ status: "ok" });
-});
+router.get("/", controller.check);
 
 export default router;

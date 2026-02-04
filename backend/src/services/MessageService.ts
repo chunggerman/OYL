@@ -1,32 +1,30 @@
-// backend/src/services/MessageService.ts
+import {
+  Message,
+  CreateMessageInput,
+  UpdateMessageInput,
+} from "../domain/entities/Message";
+import { MessageRepository } from "../domain/repositories/MessageRepository";
 
 export class MessageService {
-  constructor() {
-    // Add DB/model clients here later if needed
+  constructor(private readonly repo: MessageRepository) {}
+
+  listByChat(chatId: string): Promise<Message[]> {
+    return this.repo.listByChat(chatId);
   }
 
-  async list(threadId: string, workspaceId: string) {
-    // TODO: replace with real DB query
-    return [];
+  create(input: CreateMessageInput): Promise<Message> {
+    return this.repo.create(input);
   }
 
-  async get(id: string, workspaceId: string) {
-    // TODO: replace with real DB query
-    return null;
+  get(id: string): Promise<Message | null> {
+    return this.repo.getById(id);
   }
 
-  async create(workspaceId: string, threadId: string, content: string) {
-    // TODO: replace with real DB insert
-    return {
-      id: "temp-id",
-      workspaceId,
-      threadId,
-      content
-    };
+  update(id: string, input: UpdateMessageInput): Promise<Message | null> {
+    return this.repo.update(id, input);
   }
 
-  async delete(id: string, workspaceId: string) {
-    // TODO: replace with real DB delete
-    return;
+  delete(id: string): Promise<void> {
+    return this.repo.delete(id);
   }
 }

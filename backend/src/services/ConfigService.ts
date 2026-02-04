@@ -1,31 +1,30 @@
-// backend/src/services/ConfigService.ts
+import {
+  Config,
+  CreateConfigInput,
+  UpdateConfigInput,
+} from "../domain/entities/Config";
+import { ConfigRepository } from "../domain/repositories/ConfigRepository";
 
 export class ConfigService {
-  constructor() {
-    // Add DB/model clients here later if needed
+  constructor(private readonly repo: ConfigRepository) {}
+
+  listByWorkspace(workspaceId: string): Promise<Config[]> {
+    return this.repo.listByWorkspace(workspaceId);
   }
 
-  async list(workspaceId: string) {
-    // TODO: replace with real DB query
-    return [];
+  create(input: CreateConfigInput): Promise<Config> {
+    return this.repo.create(input);
   }
 
-  async get(workspaceId: string, key: string) {
-    // TODO: replace with real DB query
-    return null;
+  get(id: string): Promise<Config | null> {
+    return this.repo.getById(id);
   }
 
-  async set(workspaceId: string, key: string, value: any) {
-    // TODO: replace with real DB insert/update
-    return {
-      workspaceId,
-      key,
-      value
-    };
+  update(id: string, input: UpdateConfigInput): Promise<Config | null> {
+    return this.repo.update(id, input);
   }
 
-  async delete(workspaceId: string, key: string) {
-    // TODO: replace with real DB delete
-    return;
+  delete(id: string): Promise<void> {
+    return this.repo.delete(id);
   }
 }

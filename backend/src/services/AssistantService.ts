@@ -1,49 +1,30 @@
+import {
+  Assistant,
+  CreateAssistantInput,
+  UpdateAssistantInput,
+} from "../domain/entities/Assistant";
 import { AssistantRepository } from "../domain/repositories/AssistantRepository";
-import { Assistant } from "../domain/entities/Assistant";
-import { WorkspaceRepository } from "../domain/repositories/WorkspaceRepository";
 
 export class AssistantService {
-  private assistantRepository: AssistantRepository;
-  private workspaceRepository: WorkspaceRepository;
+  constructor(private readonly repo: AssistantRepository) {}
 
-  constructor(
-    assistantRepository?: AssistantRepository,
-    workspaceRepository?: WorkspaceRepository
-  ) {
-    this.assistantRepository = assistantRepository ?? new AssistantRepository();
-    this.workspaceRepository = workspaceRepository ?? new WorkspaceRepository();
+  list(): Promise<Assistant[]> {
+    return this.repo.list();
   }
 
-  async createAssistant(params: {
-    workspaceId: string;
-    name: string;
-    instruction?: string | null;
-    aiInstruction?: string | null;
-    settingsJson?: Record<string, any> | null;
-  }): Promise<Assistant> {
-    const workspace = await this.workspaceRepository.findById(params.workspaceId);
-    if (!workspace) {
-      throw new Error("Workspace not found");
-    }
-
-    return this.assistantRepository.create(
-      params.workspaceId,
-      params.name,
-      params.instruction ?? null,
-      params.aiInstruction ?? null,
-      params.settingsJson ?? null
-    );
+  create(input: CreateAssistantInput): Promise<Assistant> {
+    return this.repo.create(input);
   }
 
-  async getAssistantById(id: string): Promise<Assistant | null> {
-    return this.assistantRepository.findById(id);
+  get(id: string): Promise<Assistant | null> {
+    return this.repo.getById(id);
   }
 
-  async listAssistantsByWorkspace(workspaceId: string): Promise<Assistant[]> {
-    return this.assistantRepository.listByWorkspace(workspaceId);
+  update(id: string, input: UpdateAssistantInput): Promise<Assistant | null> {
+    return this.repo.update(id, input);
   }
 
-  async deleteAssistant(id: string): Promise<void> {
-    await this.assistantRepository.softDelete(id);
+  delete(id: string): Promise<void> {
+    return this.repo.delete(id);
   }
 }

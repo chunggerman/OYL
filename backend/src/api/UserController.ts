@@ -1,45 +1,34 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/UserService";
+import { PostgresUserRepository } from "../domain/repositories/PostgresUserRepository";
 
-export class UserController {
-  private service: UserService;
+const service = new UserService(new PostgresUserRepository());
 
-  constructor() {
-    this.service = new UserService();
-  }
-
-  list = async (req: Request, res: Response) => {
-    const tenantId = req.headers["x-tenant-id"] as string;
-    const users = await this.service.list(tenantId);
-    res.json(users);
-  };
-
-  get = async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const tenantId = req.headers["x-tenant-id"] as string;
-    const user = await this.service.get(id, tenantId);
-    res.json(user);
+export default class UserController {
+  list = async (_req: Request, res: Response) => {
+    const items = await service.list();
+    res.json({ items });
   };
 
   create = async (req: Request, res: Response) => {
-    const { email, name } = req.body;
-    const tenantId = req.headers["x-tenant-id"] as string;
-    const user = await this.service.create(email, name, tenantId);
-    res.status(201).json(user);
+    const item = await service.create(req.body);
+    res.status(201).json(item);
+  };
+
+  get = async (req: Request, res: Response) => {
+    const item = await service.get(req.params.id);
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
   };
 
   update = async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { email, name } = req.body;
-    const tenantId = req.headers["x-tenant-id"] as string;
-    const user = await this.service.update(id, email, name, tenantId);
-    res.json(user);
+    const item = await service.update(req.params.id, req.body);
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
   };
 
   delete = async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const tenantId = req.headers["x-tenant-id"] as string;
-    await this.service.delete(id, tenantId);
+    await service.delete(req.params.id);
     res.status(204).send();
   };
 }

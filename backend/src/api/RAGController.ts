@@ -1,20 +1,39 @@
-// backend/src/api/RAGController.ts
-
 import { Request, Response } from "express";
 import { RAGService } from "../services/RAGService";
+import { PostgresRAGRepository } from "../domain/repositories/PostgresRAGRepository";
 
-export class RAGController {
-  private service: RAGService;
+const service = new RAGService(new PostgresRAGRepository());
 
-  constructor() {
-    this.service = new RAGService();
-  }
+export default class RAGController {
+  listByChat = async (req: Request, res: Response) => {
+    const items = await service.listByChat(req.params.chatId);
+    res.json({ items });
+  };
 
-  generate = async (req: Request, res: Response) => {
-    const { workspaceId } = req.params;
-    const { query } = req.body;
+  listByMessage = async (req: Request, res: Response) => {
+    const items = await service.listByMessage(req.params.messageId);
+    res.json({ items });
+  };
 
-    const result = await this.service.generate(workspaceId, query);
-    res.json(result);
+  create = async (req: Request, res: Response) => {
+    const item = await service.create(req.body);
+    res.status(201).json(item);
+  };
+
+  get = async (req: Request, res: Response) => {
+    const item = await service.get(req.params.id);
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
+  };
+
+  update = async (req: Request, res: Response) => {
+    const item = await service.update(req.params.id, req.body);
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
+  };
+
+  delete = async (req: Request, res: Response) => {
+    await service.delete(req.params.id);
+    res.status(204).send();
   };
 }

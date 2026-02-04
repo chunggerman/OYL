@@ -1,44 +1,34 @@
-// backend/src/api/MessageController.ts
-
 import { Request, Response } from "express";
 import { MessageService } from "../services/MessageService";
+import { PostgresMessageRepository } from "../domain/repositories/PostgresMessageRepository";
 
-export class MessageController {
-  private service: MessageService;
+const service = new MessageService(new PostgresMessageRepository());
 
-  constructor() {
-    this.service = new MessageService();
-  }
-
-  list = async (req: Request, res: Response) => {
-    const { threadId, workspaceId } = req.params;
-    const messages = await this.service.list(threadId, workspaceId);
-    res.json(messages);
-  };
-
-  get = async (req: Request, res: Response) => {
-    const { id, workspaceId } = req.params;
-    const message = await this.service.get(id, workspaceId);
-
-    if (!message) {
-      return res.status(404).json({ error: "Message not found" });
-    }
-
-    res.json(message);
+export default class MessageController {
+  listByChat = async (req: Request, res: Response) => {
+    const items = await service.listByChat(req.params.chatId);
+    res.json({ items });
   };
 
   create = async (req: Request, res: Response) => {
-    const { threadId, workspaceId } = req.params;
-    const { content } = req.body;
+    const item = await service.create(req.body);
+    res.status(201).json(item);
+  };
 
-    const message = await this.service.create(workspaceId, threadId, content);
-    res.status(201).json(message);
+  get = async (req: Request, res: Response) => {
+    const item = await service.get(req.params.id);
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
+  };
+
+  update = async (req: Request, res: Response) => {
+    const item = await service.update(req.params.id, req.body);
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
   };
 
   delete = async (req: Request, res: Response) => {
-    const { id, workspaceId } = req.params;
-
-    await this.service.delete(id, workspaceId);
+    await service.delete(req.params.id);
     res.status(204).send();
   };
 }

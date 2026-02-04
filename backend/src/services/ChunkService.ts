@@ -1,40 +1,30 @@
-// backend/src/services/ChunkService.ts
+import {
+  Chunk,
+  CreateChunkInput,
+  UpdateChunkInput,
+} from "../domain/entities/Chunk";
+import { ChunkRepository } from "../domain/repositories/ChunkRepository";
 
 export class ChunkService {
-  constructor() {
-    // Add DB/model clients here later if needed
+  constructor(private readonly repo: ChunkRepository) {}
+
+  listByDatasource(datasourceId: string): Promise<Chunk[]> {
+    return this.repo.listByDatasource(datasourceId);
   }
 
-  async list(workspaceId: string) {
-    // TODO: replace with real DB query
-    return [];
+  create(input: CreateChunkInput): Promise<Chunk> {
+    return this.repo.create(input);
   }
 
-  async get(id: string, workspaceId: string) {
-    // TODO: replace with real DB query
-    return null;
+  get(id: string): Promise<Chunk | null> {
+    return this.repo.getById(id);
   }
 
-  async create(workspaceId: string, content: string) {
-    // TODO: replace with real DB insert
-    return {
-      id: "temp-id",
-      workspaceId,
-      content
-    };
+  update(id: string, input: UpdateChunkInput): Promise<Chunk | null> {
+    return this.repo.update(id, input);
   }
 
-  async update(id: string, workspaceId: string, content: string) {
-    // TODO: replace with real DB update
-    return {
-      id,
-      workspaceId,
-      content
-    };
-  }
-
-  async delete(id: string, workspaceId: string) {
-    // TODO: replace with real DB delete
-    return;
+  delete(id: string): Promise<void> {
+    return this.repo.delete(id);
   }
 }

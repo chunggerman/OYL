@@ -1,25 +1,21 @@
-// backend/src/api/LLMController.ts
+export default class LLMController {
+  list = async (req, res) => {
+    res.json({ items: [] });
+  };
 
-import { Request, Response } from "express";
-import { LLMService } from "../services/LLMService";
+  create = async (req, res) => {
+    res.status(201).json({ id: "temp-id", ...req.body });
+  };
 
-export class LLMController {
-  private service: LLMService;
+  get = async (req, res) => {
+    res.json({ id: req.params.id });
+  };
 
-  constructor() {
-    this.service = new LLMService();
-  }
+  update = async (req, res) => {
+    res.json({ id: req.params.id, ...req.body });
+  };
 
-  generate = async (req: Request, res: Response) => {
-    const { workspaceId } = req.params;
-    const { prompt, model } = req.body;
-
-    const result = await this.service.generate(
-      workspaceId,
-      prompt,
-      model || "default-model"
-    );
-
-    res.json(result);
+  delete = async (req, res) => {
+    res.status(204).send();
   };
 }

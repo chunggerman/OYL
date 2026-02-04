@@ -1,21 +1,13 @@
-// backend/src/api/routes/ConfigRouter.ts
-
 import { Router } from "express";
-import { ConfigController } from "../ConfigController";
+import ConfigController from "../ConfigController";
 
 const router = Router();
 const controller = new ConfigController();
 
-// List all config entries for a workspace
-router.get("/:workspaceId", controller.list);
-
-// Get a specific config key
-router.get("/:workspaceId/:key", controller.get);
-
-// Set/update a config key
-router.post("/:workspaceId/:key", controller.set);
-
-// Delete a config key
-router.delete("/:workspaceId/:key", controller.delete);
+router.get("/workspace/:workspaceId", controller.listByWorkspace);
+router.post("/", controller.create);
+router.get("/:id", controller.get);
+router.put("/:id", controller.update);
+router.delete("/:id", controller.delete);
 
 export default router;

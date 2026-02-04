@@ -1,40 +1,30 @@
-// backend/src/services/TagService.ts
+import {
+  Tag,
+  CreateTagInput,
+  UpdateTagInput,
+} from "../domain/entities/Tag";
+import { TagRepository } from "../domain/repositories/TagRepository";
 
 export class TagService {
-  constructor() {
-    // Add DB/model clients here later if needed
+  constructor(private readonly repo: TagRepository) {}
+
+  listByWorkspace(workspaceId: string): Promise<Tag[]> {
+    return this.repo.listByWorkspace(workspaceId);
   }
 
-  async list(workspaceId: string) {
-    // TODO: replace with real DB query
-    return [];
+  create(input: CreateTagInput): Promise<Tag> {
+    return this.repo.create(input);
   }
 
-  async get(id: string, workspaceId: string) {
-    // TODO: replace with real DB query
-    return null;
+  get(id: string): Promise<Tag | null> {
+    return this.repo.getById(id);
   }
 
-  async create(workspaceId: string, name: string) {
-    // TODO: replace with real DB insert
-    return {
-      id: "temp-id",
-      workspaceId,
-      name
-    };
+  update(id: string, input: UpdateTagInput): Promise<Tag | null> {
+    return this.repo.update(id, input);
   }
 
-  async update(id: string, workspaceId: string, name: string) {
-    // TODO: replace with real DB update
-    return {
-      id,
-      workspaceId,
-      name
-    };
-  }
-
-  async delete(id: string, workspaceId: string) {
-    // TODO: replace with real DB delete
-    return;
+  delete(id: string): Promise<void> {
+    return this.repo.delete(id);
   }
 }

@@ -1,33 +1,34 @@
-// backend/src/api/SemanticSearchController.ts
-
 import { Request, Response } from "express";
 import { SemanticSearchService } from "../services/SemanticSearchService";
+import { PostgresSemanticSearchRepository } from "../domain/repositories/PostgresSemanticSearchRepository";
 
-export class SemanticSearchController {
-  private service: SemanticSearchService;
+const service = new SemanticSearchService(new PostgresSemanticSearchRepository());
 
-  constructor() {
-    this.service = new SemanticSearchService();
-  }
+export default class SemanticSearchController {
+  list = async (_req: Request, res: Response) => {
+    const items = await service.list();
+    res.json({ items });
+  };
 
-  async search(req: Request, res: Response) {
-    const workspaceId = String(req.params.workspaceId);
-    const query = String(req.body.query ?? "");
-    const topK = Number(req.body.topK ?? 10);
+  create = async (req: Request, res: Response) => {
+    const item = await service.create(req.body);
+    res.status(201).json(item);
+  };
 
-    // Explicit, deterministic model selection
-    const model =
-      (req.body.model as string | undefined) ||
-      process.env.SEMANTIC_SEARCH_MODEL ||
-      "default-model";
+  get = async (req: Request, res: Response) => {
+    const item = await service.get(req.params.id);
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
+  };
 
-    const results = await this.service.search(
-      workspaceId,
-      query,
-      topK,
-      model
-    );
+  update = async (req: Request, res: Response) => {
+    const item = await service.update(req.params.id, req.body);
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
+  };
 
-    res.json(results);
-  }
+  delete = async (req: Request, res: Response) => {
+    await service.delete(req.params.id);
+    res.status(204).send();
+  };
 }

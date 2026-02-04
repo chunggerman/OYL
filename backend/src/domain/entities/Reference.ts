@@ -1,9 +1,19 @@
 export interface Reference {
   id: string;
-  workspaceId: string;
-  name: string;
-  description: string | null;
+  chunkId: string;
+  sourceType: string;      // e.g. "url", "file", "page"
+  sourceValue: string;     // e.g. URL, file path, page number
   createdAt: Date;
   updatedAt: Date;
-  deletedAt: Date | null;
+}
+
+export interface CreateReferenceInput {
+  chunkId: string;
+  sourceType: string;
+  sourceValue: string;
+}
+
+export interface UpdateReferenceInput {
+  sourceType?: string;
+  sourceValue?: string;
 }

@@ -1,10 +1,22 @@
-export interface DataSource {
+export interface Datasource {
   id: string;
   workspaceId: string;
   name: string;
-  schemaJson: any | null;
-  rowCount: number | null;
+  type: string;
+  config: any;
   createdAt: Date;
   updatedAt: Date;
-  deletedAt: Date | null;
+}
+
+export interface CreateDatasourceInput {
+  workspaceId: string;
+  name: string;
+  type: string;
+  config?: any;
+}
+
+export interface UpdateDatasourceInput {
+  name?: string;
+  type?: string;
+  config?: any;
 }

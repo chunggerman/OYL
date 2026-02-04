@@ -1,18 +1,34 @@
-import express from "express";
-import { DataSourceService } from "../services/DataSourceService";
-import { PostgresDataSourceRepository } from "../domain/repositories/PostgresDataSourceRepository";
+import { Request, Response } from "express";
+import { DatasourceService } from "../services/DataSourceService";
+import { PostgresDatasourceRepository } from "../domain/repositories/PostgresDatasourceRepository";
 
-const router = express.Router();
-const service = new DataSourceService(new PostgresDataSourceRepository());
+const service = new DatasourceService(new PostgresDatasourceRepository());
 
-router.get("/:id", async (req, res, next) => {
-  try {
-    const ds = await service.getDataSource(req.params.id);
-    if (!ds) return res.status(404).json({ message: "Not found" });
-    res.json(ds);
-  } catch (err) {
-    next(err);
-  }
-});
+export default class DatasourceController {
+  listByWorkspace = async (req: Request, res: Response) => {
+    const items = await service.listByWorkspace(req.params.workspaceId);
+    res.json({ items });
+  };
 
-export default router;
+  create = async (req: Request, res: Response) => {
+    const item = await service.create(req.body);
+    res.status(201).json(item);
+  };
+
+  get = async (req: Request, res: Response) => {
+    const item = await service.get(req.params.id);
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
+  };
+
+  update = async (req: Request, res: Response) => {
+    const item = await service.update(req.params.id, req.body);
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
+  };
+
+  delete = async (req: Request, res: Response) => {
+    await service.delete(req.params.id);
+    res.status(204).send();
+  };
+}

@@ -1,9 +1,22 @@
 export interface Chunk {
   id: string;
-  documentId: string;
-  position: number;
-  text: string;
-  tagsText: string[] | null;
+  datasourceId: string;
+  content: string;
+  embedding: number[];
+  metadata: any | null;
   createdAt: Date;
-  deletedAt: Date | null;
+  updatedAt: Date;
+}
+
+export interface CreateChunkInput {
+  datasourceId: string;
+  content: string;
+  embedding: number[];
+  metadata?: any | null;
+}
+
+export interface UpdateChunkInput {
+  content?: string;
+  embedding?: number[];
+  metadata?: any | null;
 }

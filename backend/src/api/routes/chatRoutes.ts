@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { ChatController } from "../chatController";
+import { ChatController } from "../ChatController";
 import { OllamaVectorStoreClient } from "../../providers/vector/OllamaVectorStoreClient";
 import { OllamaLlmClient } from "../../providers/llms/OllamaLlmClient";
 

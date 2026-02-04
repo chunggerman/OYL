@@ -1,44 +1,34 @@
-// backend/src/api/ConfigController.ts
-
 import { Request, Response } from "express";
 import { ConfigService } from "../services/ConfigService";
+import { PostgresConfigRepository } from "../domain/repositories/PostgresConfigRepository";
 
-export class ConfigController {
-  private service: ConfigService;
+const service = new ConfigService(new PostgresConfigRepository());
 
-  constructor() {
-    this.service = new ConfigService();
-  }
+export default class ConfigController {
+  listByWorkspace = async (req: Request, res: Response) => {
+    const items = await service.listByWorkspace(req.params.workspaceId);
+    res.json({ items });
+  };
 
-  list = async (req: Request, res: Response) => {
-    const { workspaceId } = req.params;
-    const configs = await this.service.list(workspaceId);
-    res.json(configs);
+  create = async (req: Request, res: Response) => {
+    const item = await service.create(req.body);
+    res.status(201).json(item);
   };
 
   get = async (req: Request, res: Response) => {
-    const { workspaceId, key } = req.params;
-    const config = await this.service.get(workspaceId, key);
-
-    if (!config) {
-      return res.status(404).json({ error: "Config not found" });
-    }
-
-    res.json(config);
+    const item = await service.get(req.params.id);
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
   };
 
-  set = async (req: Request, res: Response) => {
-    const { workspaceId, key } = req.params;
-    const { value } = req.body;
-
-    const config = await this.service.set(workspaceId, key, value);
-    res.status(201).json(config);
+  update = async (req: Request, res: Response) => {
+    const item = await service.update(req.params.id, req.body);
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
   };
 
   delete = async (req: Request, res: Response) => {
-    const { workspaceId, key } = req.params;
-
-    await this.service.delete(workspaceId, key);
+    await service.delete(req.params.id);
     res.status(204).send();
   };
 }

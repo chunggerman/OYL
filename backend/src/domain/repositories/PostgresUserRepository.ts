@@ -1,55 +1,103 @@
-import { Pool } from "pg";
+import { pool } from "../../db";
+import {
+  User,
+  CreateUserInput,
+  UpdateUserInput,
+} from "../entities/User";
+import { UserRepository } from "./UserRepository";
 
-export class PostgresUserRepository {
-  private pool: Pool;
+export class PostgresUserRepository implements UserRepository {
 
-  constructor() {
-    this.pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
-    });
+  /**
+   * Private Mappers
+   */
+  private mapRow(row: any): User {
+    return {
+      id: row.id,
+      email: row.email,
+      name: row.name,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
   }
 
-  async list(tenantId: string) {
-    const result = await this.pool.query(
-      `SELECT id, email, name FROM users WHERE tenant_id = $1`,
-      [tenantId]
+  /**
+   * Public Repository Methods
+   */
+  async list(): Promise<User[]> {
+    const result = await pool.query(
+      "SELECT * FROM users ORDER BY created_at DESC"
     );
-    return result.rows;
+    return result.rows.map((r) => this.mapRow(r));
   }
 
-  async get(id: string, tenantId: string) {
-    const result = await this.pool.query(
-      `SELECT id, email, name FROM users WHERE id = $1 AND tenant_id = $2`,
-      [id, tenantId]
+  async getById(id: string): Promise<User | null> {
+    const result = await pool.query(
+      "SELECT * FROM users WHERE id = $1",
+      [id]
     );
-    return result.rows[0] || null;
+
+    if (result.rows.length === 0) return null;
+    return this.mapRow(result.rows[0]);
   }
 
-  async create(email: string, name: string | null, tenantId: string) {
-    const result = await this.pool.query(
-      `INSERT INTO users (email, name, tenant_id)
-       VALUES ($1, $2, $3)
-       RETURNING id, email, name`,
-      [email, name, tenantId]
+  async getByEmail(email: string): Promise<User | null> {
+    const result = await pool.query(
+      "SELECT * FROM users WHERE email = $1",
+      [email]
     );
-    return result.rows[0];
+
+    if (result.rows.length === 0) return null;
+    return this.mapRow(result.rows[0]);
   }
 
-  async update(id: string, email: string, name: string | null, tenantId: string) {
-    const result = await this.pool.query(
-      `UPDATE users
-       SET email = $1, name = $2
-       WHERE id = $3 AND tenant_id = $4
-       RETURNING id, email, name`,
-      [email, name, id, tenantId]
+  async create(input: CreateUserInput): Promise<User> {
+    const result = await pool.query(
+      "INSERT INTO users (email, name) VALUES ($1, $2) RETURNING *",
+      [input.email, input.name ?? null]
     );
-    return result.rows[0];
+    return this.mapRow(result.rows[0]);
   }
 
-  async delete(id: string, tenantId: string) {
-    await this.pool.query(
-      `DELETE FROM users WHERE id = $1 AND tenant_id = $2`,
-      [id, tenantId]
-    );
+  async update(id: string, input: UpdateUserInput): Promise<User | null> {
+    const fields: string[] = [];
+    const values: any[] = [];
+    let idx = 1;
+
+    // Build dynamic fields for the update query
+    if (input.email !== undefined) {
+      fields.push(`email = $${idx}`);
+      values.push(input.email);
+      idx++;
+    }
+
+    if (input.name !== undefined) {
+      fields.push(`name = $${idx}`);
+      values.push(input.name);
+      idx++;
+    }
+
+    if (fields.length === 0) {
+      return this.getById(id);
+    }
+
+    // Add ID to values and target the correct index in the WHERE clause
+    values.push(id);
+
+    const query = `
+      UPDATE users
+      SET ${fields.join(", ")}, updated_at = NOW()
+      WHERE id = $${idx}
+      RETURNING *
+    `;
+
+    const result = await pool.query(query, values);
+
+    if (result.rows.length === 0) return null;
+    return this.mapRow(result.rows[0]);
+  }
+
+  async delete(id: string): Promise<void> {
+    await pool.query("DELETE FROM users WHERE id = $1", [id]);
   }
 }

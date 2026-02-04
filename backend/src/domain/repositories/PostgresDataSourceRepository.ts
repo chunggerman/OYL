@@ -1,66 +1,102 @@
 import { pool } from "../../db";
+import {
+  Datasource,
+  CreateDatasourceInput,
+  UpdateDatasourceInput,
+} from "../entities/Datasource";
+import { DatasourceRepository } from "./DatasourceRepository";
 
-export class PostgresDataSourceRepository {
-  async listByWorkspace(workspaceId: string) {
+export class PostgresDatasourceRepository implements DatasourceRepository {
+
+  /**
+   * Private Mappers
+   */
+  private mapRow(row: any): Datasource {
+    return {
+      id: row.id,
+      workspaceId: row.workspace_id,
+      name: row.name,
+      type: row.type,
+      config: row.config,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
+  }
+
+  /**
+   * Public Repository Methods
+   */
+  async listByWorkspace(workspaceId: string): Promise<Datasource[]> {
     const result = await pool.query(
-      `SELECT *
-       FROM data_sources
-       WHERE workspace_id = $1
-       ORDER BY created_at DESC`,
+      "SELECT * FROM datasources WHERE workspace_id = $1 ORDER BY created_at DESC",
       [workspaceId]
     );
-    return result.rows;
+    return result.rows.map((r) => this.mapRow(r));
   }
 
-  async getById(id: string, workspaceId: string) {
+  async create(input: CreateDatasourceInput): Promise<Datasource> {
     const result = await pool.query(
-      `SELECT *
-       FROM data_sources
-       WHERE id = $1
-         AND workspace_id = $2`,
-      [id, workspaceId]
+      "INSERT INTO datasources (workspace_id, name, type, config) VALUES ($1, $2, $3, $4) RETURNING *",
+      [input.workspaceId, input.name, input.type, input.config ?? null]
     );
-    return result.rows[0];
+    return this.mapRow(result.rows[0]);
   }
 
-  async create(
-    workspaceId: string,
-    type: string,
-    config: any
-  ) {
+  async getById(id: string): Promise<Datasource | null> {
     const result = await pool.query(
-      `INSERT INTO data_sources (workspace_id, type, config)
-       VALUES ($1, $2, $3)
-       RETURNING *`,
-      [workspaceId, type, config]
+      "SELECT * FROM datasources WHERE id = $1",
+      [id]
     );
-    return result.rows[0];
+
+    if (result.rows.length === 0) return null;
+    return this.mapRow(result.rows[0]);
   }
 
-  async update(
-    id: string,
-    workspaceId: string,
-    type: string,
-    config: any
-  ) {
-    const result = await pool.query(
-      `UPDATE data_sources
-       SET type = $3,
-           config = $4
-       WHERE id = $1
-         AND workspace_id = $2
-       RETURNING *`,
-      [id, workspaceId, type, config]
-    );
-    return result.rows[0];
+  async update(id: string, input: UpdateDatasourceInput): Promise<Datasource | null> {
+    const fields: string[] = [];
+    const values: any[] = [];
+    let idx = 1;
+
+    // Build dynamic fields for the update query
+    if (input.name !== undefined) {
+      fields.push(`name = $${idx}`);
+      values.push(input.name);
+      idx++;
+    }
+
+    if (input.type !== undefined) {
+      fields.push(`type = $${idx}`);
+      values.push(input.type);
+      idx++;
+    }
+
+    if (input.config !== undefined) {
+      fields.push(`config = $${idx}`);
+      values.push(input.config);
+      idx++;
+    }
+
+    if (fields.length === 0) {
+      return this.getById(id);
+    }
+
+    // Add ID to values and target the correct index in the WHERE clause
+    values.push(id);
+
+    const query = `
+      UPDATE datasources
+      SET ${fields.join(", ")}, updated_at = NOW()
+      WHERE id = $${idx}
+      RETURNING *
+    `;
+
+    const result = await pool.query(query, values);
+
+    if (result.rows.length === 0) return null;
+    return this.mapRow(result.rows[0]);
   }
 
-  async delete(id: string, workspaceId: string) {
-    await pool.query(
-      `DELETE FROM data_sources
-       WHERE id = $1
-         AND workspace_id = $2`,
-      [id, workspaceId]
-    );
+  async delete(id: string): Promise<void> {
+    await pool.query("DELETE FROM datasources WHERE id = $1", [id]);
   }
 }

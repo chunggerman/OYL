@@ -1,40 +1,30 @@
-// backend/src/services/ThreadService.ts
+import {
+  Thread,
+  CreateThreadInput,
+  UpdateThreadInput,
+} from "../domain/entities/Thread";
+import { ThreadRepository } from "../domain/repositories/ThreadRepository";
 
 export class ThreadService {
-  constructor() {
-    // Add DB/model clients here later if needed
+  constructor(private readonly repo: ThreadRepository) {}
+
+  listByWorkspace(workspaceId: string): Promise<Thread[]> {
+    return this.repo.listByWorkspace(workspaceId);
   }
 
-  async list(workspaceId: string) {
-    // TODO: replace with real DB query
-    return [];
+  create(input: CreateThreadInput): Promise<Thread> {
+    return this.repo.create(input);
   }
 
-  async get(id: string, workspaceId: string) {
-    // TODO: replace with real DB query
-    return null;
+  get(id: string): Promise<Thread | null> {
+    return this.repo.getById(id);
   }
 
-  async create(workspaceId: string, title: string) {
-    // TODO: replace with real DB insert
-    return {
-      id: "temp-id",
-      workspaceId,
-      title
-    };
+  update(id: string, input: UpdateThreadInput): Promise<Thread | null> {
+    return this.repo.update(id, input);
   }
 
-  async update(id: string, workspaceId: string, title: string) {
-    // TODO: replace with real DB update
-    return {
-      id,
-      workspaceId,
-      title
-    };
-  }
-
-  async delete(id: string, workspaceId: string) {
-    // TODO: replace with real DB delete
-    return;
+  delete(id: string): Promise<void> {
+    return this.repo.delete(id);
   }
 }

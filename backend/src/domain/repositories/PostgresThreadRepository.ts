@@ -1,74 +1,95 @@
 import { pool } from "../../db";
+import {
+  Thread,
+  CreateThreadInput,
+  UpdateThreadInput,
+} from "../entities/Thread";
+import { ThreadRepository } from "./ThreadRepository";
 
-export class PostgresThreadRepository {
-  async listByWorkspace(workspaceId: string) {
+export class PostgresThreadRepository implements ThreadRepository {
+
+  /**
+   * Private Mappers
+   */
+  private mapRow(row: any): Thread {
+    return {
+      id: row.id,
+      workspaceId: row.workspace_id,
+      title: row.title,
+      metadata: row.metadata,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
+  }
+
+  /**
+   * Public Repository Methods
+   */
+  async listByWorkspace(workspaceId: string): Promise<Thread[]> {
     const result = await pool.query(
-      `SELECT *
-       FROM threads
-       WHERE workspace_id = $1
-       ORDER BY updated_at DESC`,
+      "SELECT * FROM threads WHERE workspace_id = $1 ORDER BY created_at DESC",
       [workspaceId]
     );
-    return result.rows;
+    return result.rows.map((r) => this.mapRow(r));
   }
 
-  async getById(id: string, workspaceId: string) {
+  async create(input: CreateThreadInput): Promise<Thread> {
     const result = await pool.query(
-      `SELECT *
-       FROM threads
-       WHERE id = $1
-         AND workspace_id = $2`,
-      [id, workspaceId]
+      "INSERT INTO threads (workspace_id, title, metadata) VALUES ($1, $2, $3) RETURNING *",
+      [input.workspaceId, input.title, input.metadata ?? null]
     );
-    return result.rows[0];
+    return this.mapRow(result.rows[0]);
   }
 
-  async create(
-    workspaceId: string,
-    title: string | null
-  ) {
+  async getById(id: string): Promise<Thread | null> {
     const result = await pool.query(
-      `INSERT INTO threads (workspace_id, title)
-       VALUES ($1, $2)
-       RETURNING *`,
-      [workspaceId, title]
+      "SELECT * FROM threads WHERE id = $1",
+      [id]
     );
-    return result.rows[0];
+
+    if (result.rows.length === 0) return null;
+    return this.mapRow(result.rows[0]);
   }
 
-  async updateTitle(
-    id: string,
-    workspaceId: string,
-    title: string | null
-  ) {
-    const result = await pool.query(
-      `UPDATE threads
-       SET title = $3,
-           updated_at = NOW()
-       WHERE id = $1
-         AND workspace_id = $2
-       RETURNING *`,
-      [id, workspaceId, title]
-    );
-    return result.rows[0];
+  async update(id: string, input: UpdateThreadInput): Promise<Thread | null> {
+    const fields: string[] = [];
+    const values: any[] = [];
+    let idx = 1;
+
+    // Logic: Dynamically build field list for update
+    if (input.title !== undefined) {
+      fields.push(`title = $${idx}`);
+      values.push(input.title);
+      idx++;
+    }
+
+    if (input.metadata !== undefined) {
+      fields.push(`metadata = $${idx}`);
+      values.push(input.metadata);
+      idx++;
+    }
+
+    if (fields.length === 0) {
+      return this.getById(id);
+    }
+
+    // Add ID as the final parameter for the WHERE clause
+    values.push(id);
+
+    const query = `
+      UPDATE threads
+      SET ${fields.join(", ")}, updated_at = NOW()
+      WHERE id = $${idx}
+      RETURNING *
+    `;
+
+    const result = await pool.query(query, values);
+
+    if (result.rows.length === 0) return null;
+    return this.mapRow(result.rows[0]);
   }
 
-  async touch(id: string, workspaceId: string) {
-    await pool.query(
-      `UPDATE threads
-       SET updated_at = NOW()
-       WHERE id = $1
-         AND workspace_id = $2`,
-      [id, workspaceId]
-    );
-  }
-
-  async delete(id: string, workspaceId: string) {
-    await pool.query(
-      `DELETE FROM threads
-       WHERE id = $1
-         AND workspace_id = $2`,
-      [id, workspaceId]
-    );
+  async delete(id: string): Promise<void> {
+    await pool.query("DELETE FROM threads WHERE id = $1", [id]);
   }
 }

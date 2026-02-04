@@ -1,52 +1,34 @@
-// backend/src/api/TagController.ts
-
 import { Request, Response } from "express";
 import { TagService } from "../services/TagService";
+import { PostgresTagRepository } from "../domain/repositories/PostgresTagRepository";
 
-export class TagController {
-  private service: TagService;
+const service = new TagService(new PostgresTagRepository());
 
-  constructor() {
-    this.service = new TagService();
-  }
-
-  list = async (req: Request, res: Response) => {
-    const { workspaceId } = req.params;
-    const tags = await this.service.list(workspaceId);
-    res.json(tags);
-  };
-
-  get = async (req: Request, res: Response) => {
-    const { id, workspaceId } = req.params;
-    const tag = await this.service.get(id, workspaceId);
-
-    if (!tag) {
-      return res.status(404).json({ error: "Tag not found" });
-    }
-
-    res.json(tag);
+export default class TagController {
+  listByWorkspace = async (req: Request, res: Response) => {
+    const items = await service.listByWorkspace(req.params.workspaceId);
+    res.json({ items });
   };
 
   create = async (req: Request, res: Response) => {
-    const { workspaceId } = req.params;
-    const { name } = req.body;
+    const item = await service.create(req.body);
+    res.status(201).json(item);
+  };
 
-    const tag = await this.service.create(workspaceId, name);
-    res.status(201).json(tag);
+  get = async (req: Request, res: Response) => {
+    const item = await service.get(req.params.id);
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
   };
 
   update = async (req: Request, res: Response) => {
-    const { id, workspaceId } = req.params;
-    const { name } = req.body;
-
-    const tag = await this.service.update(id, workspaceId, name);
-    res.json(tag);
+    const item = await service.update(req.params.id, req.body);
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
   };
 
   delete = async (req: Request, res: Response) => {
-    const { id, workspaceId } = req.params;
-
-    await this.service.delete(id, workspaceId);
+    await service.delete(req.params.id);
     res.status(204).send();
   };
 }

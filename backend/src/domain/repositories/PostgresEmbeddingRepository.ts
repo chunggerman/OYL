@@ -1,82 +1,97 @@
 import { pool } from "../../db";
+import {
+  Embedding,
+  CreateEmbeddingInput,
+  UpdateEmbeddingInput,
+} from "../entities/Embedding";
+import { EmbeddingRepository } from "./EmbeddingRepository";
 
-export interface EmbeddingSearchResultRow {
-  id: string;
-  chunk_id: string;
-  score: number;
-}
+export class PostgresEmbeddingRepository implements EmbeddingRepository {
 
-export class PostgresEmbeddingRepository {
-  async listByChunk(chunkId: string, workspaceId: string) {
-    const result = await pool.query(
-      `SELECT *
-       FROM embeddings
-       WHERE chunk_id = $1
-         AND workspace_id = $2
-       ORDER BY created_at ASC`,
-      [chunkId, workspaceId]
-    );
-    return result.rows;
-  }
-
-  async getById(id: string, workspaceId: string) {
-    const result = await pool.query(
-      `SELECT *
-       FROM embeddings
-       WHERE id = $1
-         AND workspace_id = $2`,
-      [id, workspaceId]
-    );
-    return result.rows[0];
-  }
-
-  async create(
-    workspaceId: string,
-    chunkId: string,
-    vector: number[],
-    model: string
-  ) {
-    const result = await pool.query(
-      `INSERT INTO embeddings (workspace_id, chunk_id, vector, model)
-       VALUES ($1, $2, $3::vector, $4)
-       RETURNING *`,
-      [workspaceId, chunkId, vector, model]
-    );
-    return result.rows[0];
-  }
-
-  async deleteByChunk(chunkId: string, workspaceId: string) {
-    await pool.query(
-      `DELETE FROM embeddings
-       WHERE chunk_id = $1
-         AND workspace_id = $2`,
-      [chunkId, workspaceId]
-    );
-  }
-
-  async search(
-    workspaceId: string,
-    queryVector: number[],
-    topK: number,
-    model?: string | null
-  ): Promise<{ id: string; chunkId: string; score: number }[]> {
-    const result = await pool.query<EmbeddingSearchResultRow>(
-      `SELECT
-         id,
-         chunk_id,
-         1 - (vector <-> $1::vector) AS score
-       FROM embeddings
-       WHERE workspace_id = $2
-         AND ($3::text IS NULL OR model = $3)
-       ORDER BY vector <-> $1::vector
-       LIMIT $4`,
-      [queryVector, workspaceId, model ?? null, topK]
-    );
-
-    return result.rows.map((row) => ({
+  /**
+   * Private Mappers
+   */
+  private mapRow(row: any): Embedding {
+    return {
       id: row.id,
       chunkId: row.chunk_id,
-      score: row.score,
-    }));
+      messageId: row.message_id,
+      vector: row.vector,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
+  }
+
+  /**
+   * Public Repository Methods
+   */
+  async listByChunk(chunkId: string): Promise<Embedding[]> {
+    const result = await pool.query(
+      "SELECT * FROM embeddings WHERE chunk_id = $1 ORDER BY created_at DESC",
+      [chunkId]
+    );
+    return result.rows.map((r) => this.mapRow(r));
+  }
+
+  async listByMessage(messageId: string): Promise<Embedding[]> {
+    const result = await pool.query(
+      "SELECT * FROM embeddings WHERE message_id = $1 ORDER BY created_at DESC",
+      [messageId]
+    );
+    return result.rows.map((r) => this.mapRow(r));
+  }
+
+  async create(input: CreateEmbeddingInput): Promise<Embedding> {
+    const result = await pool.query(
+      "INSERT INTO embeddings (chunk_id, message_id, vector) VALUES ($1, $2, $3) RETURNING *",
+      [input.chunkId ?? null, input.messageId ?? null, input.vector]
+    );
+    return this.mapRow(result.rows[0]);
+  }
+
+  async getById(id: string): Promise<Embedding | null> {
+    const result = await pool.query(
+      "SELECT * FROM embeddings WHERE id = $1",
+      [id]
+    );
+
+    if (result.rows.length === 0) return null;
+    return this.mapRow(result.rows[0]);
+  }
+
+  async update(id: string, input: UpdateEmbeddingInput): Promise<Embedding | null> {
+    const fields: string[] = [];
+    const values: any[] = [];
+    let idx = 1;
+
+    // Build dynamic fields for the update query
+    if (input.vector !== undefined) {
+      fields.push(`vector = $${idx}`);
+      values.push(input.vector);
+      idx++;
+    }
+
+    if (fields.length === 0) {
+      return this.getById(id);
+    }
+
+    // Add ID to values and target the correct index in the WHERE clause
+    values.push(id);
+
+    const query = `
+      UPDATE embeddings
+      SET ${fields.join(", ")}, updated_at = NOW()
+      WHERE id = $${idx}
+      RETURNING *
+    `;
+
+    const result = await pool.query(query, values);
+
+    if (result.rows.length === 0) return null;
+    return this.mapRow(result.rows[0]);
+  }
+
+  async delete(id: string): Promise<void> {
+    await pool.query("DELETE FROM embeddings WHERE id = $1", [id]);
   }
 }

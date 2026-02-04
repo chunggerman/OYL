@@ -1,33 +1,13 @@
-export class TenantRepository {
-  async createTenant(name: string, metadataEncrypted: Record<string, any> | null) {
-    return {
-      id: "temp-id",
-      name,
-      metadataEncrypted
-    };
-  }
+import {
+  Tenant,
+  CreateTenantInput,
+  UpdateTenantInput,
+} from "../entities/Tenant";
 
-  async getAllTenants() {
-    return [];
-  }
-
-  async getTenantById(id: string) {
-    return {
-      id,
-      name: "temp",
-      metadataEncrypted: null
-    };
-  }
-
-  async updateTenant(id: string, name: string) {
-    return {
-      id,
-      name,
-      metadataEncrypted: null
-    };
-  }
-
-  async deleteTenant(id: string) {
-    return;
-  }
+export interface TenantRepository {
+  listByOwner(ownerId: string): Promise<Tenant[]>;
+  create(input: CreateTenantInput): Promise<Tenant>;
+  getById(id: string): Promise<Tenant | null>;
+  update(id: string, input: UpdateTenantInput): Promise<Tenant | null>;
+  delete(id: string): Promise<void>;
 }

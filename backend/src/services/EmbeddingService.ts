@@ -1,33 +1,34 @@
-// backend/src/services/EmbeddingService.ts
+import {
+  Embedding,
+  CreateEmbeddingInput,
+  UpdateEmbeddingInput,
+} from "../domain/entities/Embedding";
+import { EmbeddingRepository } from "../domain/repositories/EmbeddingRepository";
 
 export class EmbeddingService {
-  constructor() {
-    // No dependencies required for now.
-    // Add modelClient or DB clients here later when needed.
+  constructor(private readonly repo: EmbeddingRepository) {}
+
+  listByChunk(chunkId: string): Promise<Embedding[]> {
+    return this.repo.listByChunk(chunkId);
   }
 
-  async listByChunk(chunkId: string, workspaceId: string) {
-    // TODO: replace with real DB query
-    return [];
+  listByMessage(messageId: string): Promise<Embedding[]> {
+    return this.repo.listByMessage(messageId);
   }
 
-  async get(id: string, workspaceId: string) {
-    // TODO: replace with real DB query
-    return null;
+  create(input: CreateEmbeddingInput): Promise<Embedding> {
+    return this.repo.create(input);
   }
 
-  async create(workspaceId: string, chunkId: string, vector: number[]) {
-    // TODO: replace with real DB insert
-    return {
-      id: "temp-id",
-      workspaceId,
-      chunkId,
-      vector
-    };
+  get(id: string): Promise<Embedding | null> {
+    return this.repo.getById(id);
   }
 
-  async delete(id: string, workspaceId: string) {
-    // TODO: replace with real DB delete
-    return;
+  update(id: string, input: UpdateEmbeddingInput): Promise<Embedding | null> {
+    return this.repo.update(id, input);
+  }
+
+  delete(id: string): Promise<void> {
+    return this.repo.delete(id);
   }
 }
