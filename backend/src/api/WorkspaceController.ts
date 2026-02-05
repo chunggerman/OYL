@@ -1,34 +1,70 @@
 import { Request, Response } from "express";
-import { WorkspaceService } from "../services/WorkspaceService";
 import { PostgresWorkspaceRepository } from "../domain/repositories/PostgresWorkspaceRepository";
 
-const service = new WorkspaceService(new PostgresWorkspaceRepository());
-
 export default class WorkspaceController {
-  listByUser = async (req: Request, res: Response) => {
-    const items = await service.listByUser(req.params.userId);
-    res.json({ items });
-  };
+  private repository;
 
-  create = async (req: Request, res: Response) => {
-    const item = await service.create(req.body);
-    res.status(201).json(item);
-  };
+  constructor() {
+    this.repository = new PostgresWorkspaceRepository();
+  }
 
-  get = async (req: Request, res: Response) => {
-    const item = await service.get(req.params.id);
-    if (!item) return res.status(404).json({ error: "Not found" });
-    res.json(item);
-  };
+  async list(req: Request, res: Response) {
+    try {
+      const items = await this.repository.list();
+      res.json({ items });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Failed to list workspaces" });
+    }
+  }
 
-  update = async (req: Request, res: Response) => {
-    const item = await service.update(req.params.id, req.body);
-    if (!item) return res.status(404).json({ error: "Not found" });
-    res.json(item);
-  };
+  async listByUser(req: Request, res: Response) {
+    try {
+      const items = await this.repository.listByUser(req.params.userId);
+      res.json({ items });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Failed to list workspaces by user" });
+    }
+  }
 
-  delete = async (req: Request, res: Response) => {
-    await service.delete(req.params.id);
-    res.status(204).send();
-  };
+  async create(req: Request, res: Response) {
+    try {
+      const item = await this.repository.create(req.body);
+      res.json(item);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Failed to create workspace" });
+    }
+  }
+
+  async get(req: Request, res: Response) {
+    try {
+      const item = await this.repository.get(req.params.id);
+      res.json(item);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Failed to get workspace" });
+    }
+  }
+
+  async update(req: Request, res: Response) {
+    try {
+      const item = await this.repository.update(req.params.id, req.body);
+      res.json(item);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Failed to update workspace" });
+    }
+  }
+
+  async delete(req: Request, res: Response) {
+    try {
+      await this.repository.delete(req.params.id);
+      res.json({ success: true });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Failed to delete workspace" });
+    }
+  }
 }

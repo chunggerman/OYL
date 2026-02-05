@@ -5,8 +5,8 @@ import { PostgresDatasourceRepository } from "../domain/repositories/PostgresDat
 const service = new DatasourceService(new PostgresDatasourceRepository());
 
 export default class DatasourceController {
-  listByWorkspace = async (req: Request, res: Response) => {
-    const items = await service.listByWorkspace(req.params.workspaceId);
+  list = async (req: Request, res: Response) => {
+    const items = await service.list();
     res.json({ items });
   };
 

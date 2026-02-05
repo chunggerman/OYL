@@ -1,30 +1,27 @@
-import {
-  Datasource,
-  CreateDatasourceInput,
-  UpdateDatasourceInput,
-} from "../domain/entities/Datasource";
-import { DatasourceRepository } from "../domain/repositories/DatasourceRepository";
-
 export class DatasourceService {
-  constructor(private readonly repo: DatasourceRepository) {}
+  private repo: any;
 
-  listByWorkspace(workspaceId: string): Promise<Datasource[]> {
-    return this.repo.listByWorkspace(workspaceId);
+  constructor(repo: any) {
+    this.repo = repo;
   }
 
-  create(input: CreateDatasourceInput): Promise<Datasource> {
-    return this.repo.create(input);
+  list() {
+    return this.repo.list();
   }
 
-  get(id: string): Promise<Datasource | null> {
-    return this.repo.getById(id);
+  create(data: any) {
+    return this.repo.create(data);
   }
 
-  update(id: string, input: UpdateDatasourceInput): Promise<Datasource | null> {
-    return this.repo.update(id, input);
+  get(id: string) {
+    return this.repo.get(id);
   }
 
-  delete(id: string): Promise<void> {
+  update(id: string, data: any) {
+    return this.repo.update(id, data);
+  }
+
+  delete(id: string) {
     return this.repo.delete(id);
   }
 }

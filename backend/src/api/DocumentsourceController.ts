@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
-import { DatasourceService } from "../services/DatasourceService";
-import { PostgresDatasourceRepository } from "../domain/repositories/PostgresDatasourceRepository";
+//import { DocumentSourceService } from "../services/DocumentsourceService";
+//import { PostgresDocumentSourceRepository } from "../domain/repositories/PostgresDocumentsourceRepository";
+import { DocumentSourceService } from "../services/DocumentsourceService";
+import { PostgresDocumentSourceRepository } from "../domain/repositories/PostgresDocumentsourceRepository";
+const service = new DocumentSourceService(new PostgresDocumentSourceRepository());
 
-const service = new DatasourceService(new PostgresDatasourceRepository());
-
-export default class DatasourceController {
-  listByWorkspace = async (req: Request, res: Response) => {
-    const items = await service.listByWorkspace(req.params.workspaceId);
+export default class DocumentsourceController {
+  list = async (req: Request, res: Response) => {
+    const items = await service.list();
     res.json({ items });
   };
 

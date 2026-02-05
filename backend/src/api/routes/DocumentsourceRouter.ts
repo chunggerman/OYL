@@ -1,11 +1,10 @@
 import { Router } from "express";
-import WorkspaceController from "../WorkspaceController";
-
+//import DocumentSourceController from "../DocumentsourceController";
+import DocumentsourceController from "../DocumentsourceController";
 const router = Router();
-const controller = new WorkspaceController();
+const controller = new DocumentsourceController();
 
 router.get("/", controller.list.bind(controller));
-router.get("/user/:userId", controller.listByUser.bind(controller));
 router.post("/", controller.create.bind(controller));
 router.get("/:id", controller.get.bind(controller));
 router.put("/:id", controller.update.bind(controller));

@@ -5,6 +5,11 @@ import { PostgresChunkRepository } from "../domain/repositories/PostgresChunkRep
 const service = new ChunkService(new PostgresChunkRepository());
 
 export default class ChunkController {
+  list = async (req: Request, res: Response) => {
+    const items = await service.list();
+    res.json({ items });
+  };
+
   listByDatasource = async (req: Request, res: Response) => {
     const items = await service.listByDatasource(req.params.datasourceId);
     res.json({ items });

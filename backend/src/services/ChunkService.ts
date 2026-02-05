@@ -1,30 +1,33 @@
-import {
-  Chunk,
-  CreateChunkInput,
-  UpdateChunkInput,
-} from "../domain/entities/Chunk";
-import { ChunkRepository } from "../domain/repositories/ChunkRepository";
+import { PostgresChunkRepository } from "../domain/repositories/PostgresChunkRepository";
 
 export class ChunkService {
-  constructor(private readonly repo: ChunkRepository) {}
+  private repo: PostgresChunkRepository;
 
-  listByDatasource(datasourceId: string): Promise<Chunk[]> {
+  constructor(repo: PostgresChunkRepository) {
+    this.repo = repo;
+  }
+
+  list() {
+    return this.repo.list();
+  }
+
+  listByDatasource(datasourceId: string) {
     return this.repo.listByDatasource(datasourceId);
   }
 
-  create(input: CreateChunkInput): Promise<Chunk> {
-    return this.repo.create(input);
+  create(data: any) {
+    return this.repo.create(data);
   }
 
-  get(id: string): Promise<Chunk | null> {
-    return this.repo.getById(id);
+  get(id: string) {
+    return this.repo.get(id);
   }
 
-  update(id: string, input: UpdateChunkInput): Promise<Chunk | null> {
-    return this.repo.update(id, input);
+  update(id: string, data: any) {
+    return this.repo.update(id, data);
   }
 
-  delete(id: string): Promise<void> {
+  delete(id: string) {
     return this.repo.delete(id);
   }
 }

@@ -26,6 +26,13 @@ export class PostgresChunkRepository implements ChunkRepository {
   /**
    * Public Repository Methods
    */
+  async list(): Promise<Chunk[]> {
+    const result = await pool.query(
+      "SELECT * FROM chunks ORDER BY created_at DESC"
+    );
+    return result.rows.map((r) => this.mapRow(r));
+  }
+
   async listByDatasource(datasourceId: string): Promise<Chunk[]> {
     const result = await pool.query(
       "SELECT * FROM chunks WHERE datasource_id = $1 ORDER BY created_at DESC",
@@ -47,7 +54,7 @@ export class PostgresChunkRepository implements ChunkRepository {
     return this.mapRow(result.rows[0]);
   }
 
-  async getById(id: string): Promise<Chunk | null> {
+  async get(id: string): Promise<Chunk | null> {
     const result = await pool.query(
       "SELECT * FROM chunks WHERE id = $1",
       [id]
@@ -55,6 +62,10 @@ export class PostgresChunkRepository implements ChunkRepository {
 
     if (result.rows.length === 0) return null;
     return this.mapRow(result.rows[0]);
+  }
+
+  async getById(id: string) {
+    return this.get(id);
   }
 
   async update(id: string, input: UpdateChunkInput): Promise<Chunk | null> {
@@ -82,7 +93,7 @@ export class PostgresChunkRepository implements ChunkRepository {
     }
 
     if (fields.length === 0) {
-      return this.getById(id);
+      return this.get(id);
     }
 
     // Add ID as the final parameter for the WHERE clause

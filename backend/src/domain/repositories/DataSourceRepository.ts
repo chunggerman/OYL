@@ -1,13 +1,29 @@
-import {
-  Datasource,
-  CreateDatasourceInput,
-  UpdateDatasourceInput,
-} from "../entities/Datasource";
+import { PostgresDatasourceRepository } from "../domain/repositories/PostgresDatasourceRepository";
 
-export interface DatasourceRepository {
-  listByWorkspace(workspaceId: string): Promise<Datasource[]>;
-  create(input: CreateDatasourceInput): Promise<Datasource>;
-  getById(id: string): Promise<Datasource | null>;
-  update(id: string, input: UpdateDatasourceInput): Promise<Datasource | null>;
-  delete(id: string): Promise<void>;
+export class DatasourceService {
+  private repo: PostgresDatasourceRepository;
+
+  constructor(repo: PostgresDatasourceRepository) {
+    this.repo = repo;
+  }
+
+  list() {
+    return this.repo.list();
+  }
+
+  create(data: any) {
+    return this.repo.create(data);
+  }
+
+  get(id: string) {
+    return this.repo.get(id);
+  }
+
+  update(id: string, data: any) {
+    return this.repo.update(id, data);
+  }
+
+  delete(id: string) {
+    return this.repo.delete(id);
+  }
 }
