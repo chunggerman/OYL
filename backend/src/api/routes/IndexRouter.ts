@@ -29,7 +29,7 @@ IndexRouter.use("/chats", ChatRouter);
 IndexRouter.use("/chunks", ChunkRouter);
 IndexRouter.use("/configs", ConfigRouter);
 IndexRouter.use("/datasources", DatasourceRouter);
-IndexRouter.use("/documentsources", DocumentsourceRouter);
+IndexRouter.use("/documentsource", DocumentsourceRouter);
 IndexRouter.use("/embeddings", EmbeddingRouter);
 IndexRouter.use("/files", FileUploadRouter);
 IndexRouter.use("/health", HealthRouter);

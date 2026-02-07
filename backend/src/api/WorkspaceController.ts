@@ -1,70 +1,47 @@
 import { Request, Response } from "express";
-import { PostgresWorkspaceRepository } from "../domain/repositories/PostgresWorkspaceRepository";
+import { WorkspaceService } from "../services/WorkspaceService";
 
 export default class WorkspaceController {
-  private repository;
+  constructor(private service: WorkspaceService) {}
 
-  constructor() {
-    this.repository = new PostgresWorkspaceRepository();
-  }
-
-  async list(req: Request, res: Response) {
+  getById = async (req: Request, res: Response) => {
     try {
-      const items = await this.repository.list();
-      res.json({ items });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Failed to list workspaces" });
+      // At this point, isolation middleware already validated:
+      // - workspace exists
+      // - workspace.ownerId matches X-Tenant-ID
+      const workspace = await this.service.getById(req.params.id);
+      return res.json(workspace);
+    } catch {
+      return res.status(500).json({ error: "Internal server error" });
     }
-  }
+  };
 
-  async listByUser(req: Request, res: Response) {
+  create = async (req: Request, res: Response) => {
     try {
-      const items = await this.repository.listByUser(req.params.userId);
-      res.json({ items });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Failed to list workspaces by user" });
+      const workspace = await this.service.create(req.body);
+      return res.status(201).json(workspace);
+    } catch {
+      return res.status(500).json({ error: "Internal server error" });
     }
-  }
+  };
 
-  async create(req: Request, res: Response) {
+  update = async (req: Request, res: Response) => {
     try {
-      const item = await this.repository.create(req.body);
-      res.json(item);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Failed to create workspace" });
+      // Isolation middleware ensures workspace exists + belongs to tenant
+      const workspace = await this.service.update(req.params.id, req.body);
+      return res.json(workspace);
+    } catch {
+      return res.status(500).json({ error: "Internal server error" });
     }
-  }
+  };
 
-  async get(req: Request, res: Response) {
+  delete = async (req: Request, res: Response) => {
     try {
-      const item = await this.repository.get(req.params.id);
-      res.json(item);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Failed to get workspace" });
+      // Isolation middleware ensures workspace exists + belongs to tenant
+      await this.service.delete(req.params.id);
+      return res.status(200).json({ deleted: true });
+    } catch {
+      return res.status(500).json({ error: "Internal server error" });
     }
-  }
-
-  async update(req: Request, res: Response) {
-    try {
-      const item = await this.repository.update(req.params.id, req.body);
-      res.json(item);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Failed to update workspace" });
-    }
-  }
-
-  async delete(req: Request, res: Response) {
-    try {
-      await this.repository.delete(req.params.id);
-      res.json({ success: true });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Failed to delete workspace" });
-    }
-  }
+  };
 }

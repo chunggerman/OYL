@@ -1,9 +1,9 @@
 //import { PostgresDocumentsourceRepository } from "../domain/repositories/PostgresDocumentsourceRepository";
-import { PostgresDocumentSourceRepository } from "../domain/repositories/PostgresDocumentSourceRepository"
+import { PostgresDocumentsourceRepository } from "../domain/repositories/PostgresDocumentsourceRepository"
 export class DocumentsourceService {
-  private repo: PostgresDocumentSourceRepository;
+  private repo: PostgresDocumentsourceRepository;
 
-  constructor(repo: PostgresDocumentSourceRepository) {
+  constructor(repo: PostgresDocumentsourceRepository) {
     this.repo = repo;
   }
 

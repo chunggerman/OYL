@@ -7,38 +7,27 @@ import {
 import { TenantRepository } from "./TenantRepository";
 
 export class PostgresTenantRepository implements TenantRepository {
-
-  /**
-   * Private Mappers
-   */
-  private mapRow(row: any): Tenant {
-    return {
-      id: row.id,
-      ownerId: row.owner_id,
-      name: row.name,
-      metadata: row.metadata,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-    };
-  }
-
-  /**
-   * Public Repository Methods
-   */
-  async listByOwner(ownerId: string): Promise<Tenant[]> {
+  async listByUser(ownerId: string): Promise<Tenant[]> {
     const result = await pool.query(
-      "SELECT * FROM tenants WHERE owner_id = $1 ORDER BY created_at DESC",
+      "SELECT * FROM tenants WHERE owner_id = $1",
       [ownerId]
     );
-    return result.rows.map((r) => this.mapRow(r));
+    return result.rows;
   }
 
   async create(input: CreateTenantInput): Promise<Tenant> {
+    const metadataEncrypted =
+      input.metadata !== undefined && input.metadata !== null
+        ? JSON.stringify(input.metadata)
+        : null;
+
     const result = await pool.query(
-      "INSERT INTO tenants (owner_id, name, metadata) VALUES ($1, $2, $3) RETURNING *",
-      [input.ownerId, input.name, input.metadata ?? null]
+      `INSERT INTO tenants (name, metadata_encrypted, owner_id)
+       VALUES ($1, $2, $3)
+       RETURNING *`,
+      [input.name, metadataEncrypted, input.ownerId]
     );
-    return this.mapRow(result.rows[0]);
+    return result.rows[0];
   }
 
   async getById(id: string): Promise<Tenant | null> {
@@ -46,50 +35,50 @@ export class PostgresTenantRepository implements TenantRepository {
       "SELECT * FROM tenants WHERE id = $1",
       [id]
     );
-
-    if (result.rows.length === 0) return null;
-    return this.mapRow(result.rows[0]);
+    return result.rows[0] || null;
   }
 
   async update(id: string, input: UpdateTenantInput): Promise<Tenant | null> {
-    const fields: string[] = [];
-    const values: any[] = [];
-    let idx = 1;
+    const existingResult = await pool.query(
+      "SELECT * FROM tenants WHERE id = $1",
+      [id]
+    );
 
-    // Logic: Build dynamic field list for update
-    if (input.name !== undefined) {
-      fields.push(`name = $${idx}`);
-      values.push(input.name);
-      idx++;
+    if (existingResult.rows.length === 0) {
+      return null;
     }
 
-    if (input.metadata !== undefined) {
-      fields.push(`metadata = $${idx}`);
-      values.push(input.metadata);
-      idx++;
-    }
+    const existing = existingResult.rows[0];
 
-    if (fields.length === 0) {
-      return this.getById(id);
-    }
+    const newName =
+      input.name !== undefined && input.name !== null
+        ? input.name
+        : existing.name;
 
-    // Add ID to values for the WHERE clause
-    values.push(id);
+    const newMetadataEncrypted =
+      input.metadata !== undefined && input.metadata !== null
+        ? JSON.stringify(input.metadata)
+        : existing.metadata_encrypted;
 
-    const query = `
-      UPDATE tenants
-      SET ${fields.join(", ")}, updated_at = NOW()
-      WHERE id = $${idx}
-      RETURNING *
-    `;
+    const result = await pool.query(
+      `UPDATE tenants
+         SET name = $1,
+             metadata_encrypted = $2,
+             updated_at = NOW()
+       WHERE id = $3
+       RETURNING *`,
+      [newName, newMetadataEncrypted, id]
+    );
 
-    const result = await pool.query(query, values);
-
-    if (result.rows.length === 0) return null;
-    return this.mapRow(result.rows[0]);
+    return result.rows[0] || null;
   }
 
   async delete(id: string): Promise<void> {
-    await pool.query("DELETE FROM tenants WHERE id = $1", [id]);
+    await pool.query(
+      `UPDATE tenants
+         SET deleted_at = NOW()
+       WHERE id = $1`,
+      [id]
+    );
   }
 }
