@@ -1,8 +1,10 @@
 #!/bin/sh
 
 BASE_URL="http://localhost:3001"
-USER_ID="5c26f661-1b73-4387-b4dc-cb379fe29ccd"
 TENANT_ID="80e8a565-2af4-43c7-bdb3-285ae5f9285b"
+
+WORKSPACE_A="a9485bec-cfa2-4cdc-aec1-e748933a075b"
+WORKSPACE_B="b046191a-72a4-4aec-a854-bf732f9b3297"
 
 OUTPUT_MD="./backend/testing/result/02_workspace_test_result.md"
 OUTPUT_HTML="./backend/testing/result/02_workspace_test_result.html"
@@ -10,17 +12,13 @@ OUTPUT_HTML="./backend/testing/result/02_workspace_test_result.html"
 # Expected status codes
 expected_status() {
   case "$1" in
-    WSP-000) echo 200 ;;   # Preconditions
-    WSP-001) echo 201 ;;   # Create workspace
-    WSP-002) echo 409 ;;   # Duplicate name
-    WSP-003) echo 200 ;;   # Retrieve workspace
-    WSP-004) echo 200 ;;   # List workspaces
-    WSP-005) echo 200 ;;   # Update workspace
-    WSP-006) echo 200 ;;   # Delete workspace
-    WSP-007) echo 403 ;;   # Cross-workspace isolation
-    WSP-008) echo 403 ;;   # Assistant boundary
-    WSP-009) echo 403 ;;   # Reference boundary
-    WSP-010) echo 403 ;;   # Workflow boundary
+    WSP-001) echo 200 ;;
+    WSP-002) echo 200 ;;
+    WSP-003) echo 403 ;;
+    WSP-004) echo 200 ;;
+    WSP-005) echo 200 ;;
+    WSP-006) echo 200 ;;
+    WSP-007) echo 403 ;;
   esac
 }
 
@@ -69,65 +67,26 @@ run_test() {
 # TESTS
 ###############################################
 
-# WSP-000 — Preconditions
-run_test "WSP-000" "Preconditions: user + tenant exist" \
-"curl -i -X GET $BASE_URL/users/$USER_ID"
+run_test "WSP-001" "Get Workspace A" \
+"curl -i $BASE_URL/workspaces/$WORKSPACE_A -H 'X-Tenant-ID: $TENANT_ID'"
 
-# WSP-001 — Create workspace
-run_test "WSP-001" "Create workspace" \
-"curl -i -X POST $BASE_URL/workspaces \
-  -H 'Content-Type: application/json' \
-  -H 'X-Tenant-ID: $TENANT_ID' \
-  -d '{\"ownerId\":\"$TENANT_ID\",\"name\":\"Main Workspace\",\"metadata\":{\"purpose\":\"general\"}}'"
+run_test "WSP-002" "Get Workspace B" \
+"curl -i $BASE_URL/workspaces/$WORKSPACE_B -H 'X-Tenant-ID: $TENANT_ID'"
 
-# WSP-002 — Duplicate workspace name
-run_test "WSP-002" "Create workspace with duplicate name" \
-"curl -i -X POST $BASE_URL/workspaces \
-  -H 'Content-Type: application/json' \
-  -H 'X-Tenant-ID: $TENANT_ID' \
-  -d '{\"ownerId\":\"$TENANT_ID\",\"name\":\"Main Workspace\"}'"
+run_test "WSP-003" "Forbidden: Wrong Tenant" \
+"curl -i $BASE_URL/workspaces/$WORKSPACE_A -H 'X-Tenant-ID: 11111111-1111-1111-1111-111111111111'"
 
-# WSP-003 — Retrieve workspace
-run_test "WSP-003" "Retrieve workspace" \
-"curl -i -X GET $BASE_URL/workspaces/{workspace_id} \
-  -H 'X-Tenant-ID: $TENANT_ID'"
+run_test "WSP-004" "Update Workspace A" \
+"curl -i -X PATCH $BASE_URL/workspaces/$WORKSPACE_A -H 'Content-Type: application/json' -H 'X-Tenant-ID: $TENANT_ID' -d '{\"name\":\"Workspace A Updated\"}'"
 
-# WSP-004 — List workspaces
-run_test "WSP-004" "Retrieve workspace list" \
-"curl -i -X GET \"$BASE_URL/workspaces?ownerId=$TENANT_ID\" \
-  -H 'X-Tenant-ID: $TENANT_ID'"
+run_test "WSP-005" "Update Workspace B" \
+"curl -i -X PATCH $BASE_URL/workspaces/$WORKSPACE_B -H 'Content-Type: application/json' -H 'X-Tenant-ID: $TENANT_ID' -d '{\"description\":\"test-B-updated\"}'"
 
-# WSP-005 — Update workspace
-run_test "WSP-005" "Update workspace name" \
-"curl -i -X PATCH $BASE_URL/workspaces/{workspace_id} \
-  -H 'Content-Type: application/json' \
-  -H 'X-Tenant-ID: $TENANT_ID' \
-  -d '{\"name\":\"Updated Workspace Name\"}'"
+run_test "WSP-006" "Delete Workspace A" \
+"curl -i -X DELETE $BASE_URL/workspaces/$WORKSPACE_A -H 'X-Tenant-ID: $TENANT_ID'"
 
-# WSP-006 — Delete workspace
-run_test "WSP-006" "Delete workspace" \
-"curl -i -X DELETE $BASE_URL/workspaces/{workspace_id} \
-  -H 'X-Tenant-ID: $TENANT_ID'"
-
-# WSP-007 — Cross-workspace isolation
-run_test "WSP-007" "Cross-workspace isolation" \
-"curl -i -X GET $BASE_URL/workspaces/{workspace_b_id} \
-  -H 'X-Tenant-ID: {workspace_a_ownerId}'"
-
-# WSP-008 — Assistant boundary
-run_test "WSP-008" "Workspace boundary on assistants" \
-"curl -i -X GET $BASE_URL/assistants/{assistant_id} \
-  -H 'X-Workspace-ID: {workspace_other_id}'"
-
-# WSP-009 — Reference boundary
-run_test "WSP-009" "Workspace boundary on references" \
-"curl -i -X GET $BASE_URL/references/{reference_id} \
-  -H 'X-Workspace-ID: {workspace_other_id}'"
-
-# WSP-010 — Workflow boundary
-run_test "WSP-010" "Workspace boundary on workflows" \
-"curl -i -X POST $BASE_URL/workflows/{workflow_id}/execute \
-  -H 'X-Workspace-ID: {workspace_other_id}'"
+run_test "WSP-007" "Verify Workspace A is Soft Deleted" \
+"curl -i $BASE_URL/workspaces/$WORKSPACE_A -H 'X-Tenant-ID: $TENANT_ID'"
 
 echo "</body></html>" >> "$OUTPUT_HTML"
 

@@ -1,3 +1,5 @@
+// backend/src/domain/repositories/WorkspaceRepository.ts
+
 import {
   Workspace,
   CreateWorkspaceInput,
@@ -5,6 +7,7 @@ import {
 } from "../entities/Workspace";
 
 export interface WorkspaceRepository {
+  // NOTE: userId here is actually tenantId in our schema
   listByUser(userId: string): Promise<Workspace[]>;
   create(input: CreateWorkspaceInput): Promise<Workspace>;
   getById(id: string): Promise<Workspace | null>;

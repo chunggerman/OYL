@@ -1,19 +1,22 @@
+// backend/src/domain/entities/Workspace.ts
+
 export interface Workspace {
   id: string;
-  ownerId: string;
+  tenantId: string;
   name: string;
-  metadata: any | null;
+  description: string | null;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt: Date | null;
 }
 
 export interface CreateWorkspaceInput {
-  ownerId: string;
+  tenantId: string;
   name: string;
-  metadata?: any | null;
+  description?: string | null;
 }
 
 export interface UpdateWorkspaceInput {
   name?: string;
-  metadata?: any | null;
+  description?: string | null;
 }

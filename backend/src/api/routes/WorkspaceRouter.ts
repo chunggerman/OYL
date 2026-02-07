@@ -1,3 +1,5 @@
+// backend/src/api/WorkspaceRouter.ts
+
 import { Router, Request, Response, NextFunction } from "express";
 import WorkspaceController from "../WorkspaceController";
 import { WorkspaceService } from "../../services/WorkspaceService";
@@ -30,7 +32,7 @@ const workspaceTenantIsolation = async (
       return res.status(403).json({ error: "Forbidden" });
     }
 
-    if (workspace.ownerId !== headerTenantId) {
+    if (workspace.tenantId !== headerTenantId) {
       return res.status(403).json({ error: "Forbidden" });
     }
 
