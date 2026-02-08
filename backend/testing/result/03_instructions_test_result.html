@@ -1,0 +1,417 @@
+<html><body><h1>Instructions Test Results</h1><p>Generated: Sun Feb  8 19:43:41 HKT 2026</p>
+<h2>INS-000 — Create instruction</h2>
+<p><b>Expected:</b> 201<br>
+<b>Actual:</b> 404<br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/workspaces//instructions -H 'Content-Type: application/json' -H 'X-Workspace-ID: ' -d '{"name":"Summarize Policy","content":"Summarize the document in 3 bullet points."}'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   246  100   164  100    82   213k   106k --:--:-- --:--:-- --:--:--  240k
+HTTP/1.1 404 Not Found
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Security-Policy: default-src 'none'
+X-Content-Type-Options: nosniff
+Content-Type: text/html; charset=utf-8
+Content-Length: 164
+Date: Sun, 08 Feb 2026 11:43:41 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /workspaces//instructions</pre>
+</body>
+</html></pre>
+<h2>INS-001 — Missing instruction name</h2>
+<p><b>Expected:</b> 400<br>
+<b>Actual:</b> 404<br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/workspaces//instructions -H 'Content-Type: application/json' -H 'X-Workspace-ID: ' -d '{"name":"","content":"Valid content"}'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   201  100   164  100    37   209k  48429 --:--:-- --:--:-- --:--:--  196k
+HTTP/1.1 404 Not Found
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Security-Policy: default-src 'none'
+X-Content-Type-Options: nosniff
+Content-Type: text/html; charset=utf-8
+Content-Length: 164
+Date: Sun, 08 Feb 2026 11:43:41 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /workspaces//instructions</pre>
+</body>
+</html></pre>
+<h2>INS-002 — Missing instruction content</h2>
+<p><b>Expected:</b> 400<br>
+<b>Actual:</b> 404<br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/workspaces//instructions -H 'Content-Type: application/json' -H 'X-Workspace-ID: ' -d '{"name":"Test","content":""}'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   192  100   164  100    28   230k  40345 --:--:-- --:--:-- --:--:--  187k
+HTTP/1.1 404 Not Found
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Security-Policy: default-src 'none'
+X-Content-Type-Options: nosniff
+Content-Type: text/html; charset=utf-8
+Content-Length: 164
+Date: Sun, 08 Feb 2026 11:43:41 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /workspaces//instructions</pre>
+</body>
+</html></pre>
+<h2>INS-003 — AI-refine instruction</h2>
+<p><b>Expected:</b> 200<br>
+<b>Actual:</b> 404<br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/instructions//refine -H 'X-Workspace-ID: '</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   160  100   160    0     0   189k      0 --:--:-- --:--:-- --:--:--  156k
+HTTP/1.1 404 Not Found
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Security-Policy: default-src 'none'
+X-Content-Type-Options: nosniff
+Content-Type: text/html; charset=utf-8
+Content-Length: 160
+Date: Sun, 08 Feb 2026 11:43:41 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /instructions//refine</pre>
+</body>
+</html></pre>
+<h2>INS-004 — AI-refine invalid instruction</h2>
+<p><b>Expected:</b> 404<br>
+<b>Actual:</b> 200<br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/instructions/00000000-0000-0000-0000-000000000000/refine -H 'X-Workspace-ID: '</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100     4  100     4    0     0    291      0 --:--:-- --:--:-- --:--:--   307
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 4
+ETag: W/"4-K+iMpCQsduglOsYkdIUQZQMtaDM"
+Date: Sun, 08 Feb 2026 11:43:41 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+null</pre>
+<h2>INS-005 — AI-refine empty content</h2>
+<p><b>Expected:</b> 400<br>
+<b>Actual:</b> 404<br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/instructions//refine -H 'X-Workspace-ID: '</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   160  100   160    0     0   215k      0 --:--:-- --:--:-- --:--:--  156k
+HTTP/1.1 404 Not Found
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Security-Policy: default-src 'none'
+X-Content-Type-Options: nosniff
+Content-Type: text/html; charset=utf-8
+Content-Length: 160
+Date: Sun, 08 Feb 2026 11:43:41 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /instructions//refine</pre>
+</body>
+</html></pre>
+<h2>INS-006 — Retrieve instruction</h2>
+<p><b>Expected:</b> 200<br>
+<b>Actual:</b> 404<br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X GET http://localhost:3001/instructions/ -H 'X-Workspace-ID: '</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   152  100   152    0     0   262k      0 --:--:-- --:--:-- --:--:--  148k
+HTTP/1.1 404 Not Found
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Security-Policy: default-src 'none'
+X-Content-Type-Options: nosniff
+Content-Type: text/html; charset=utf-8
+Content-Length: 152
+Date: Sun, 08 Feb 2026 11:43:41 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot GET /instructions/</pre>
+</body>
+</html></pre>
+<h2>INS-007 — List instructions</h2>
+<p><b>Expected:</b> 200<br>
+<b>Actual:</b> 403<br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X GET http://localhost:3001/workspaces//instructions -H 'X-Workspace-ID: '</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    21  100    21    0     0  31296      0 --:--:-- --:--:-- --:--:-- 21000
+HTTP/1.1 403 Forbidden
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 21
+ETag: W/"15-TLNzmZqKxaTuFdX/dVWWPBu44/c"
+Date: Sun, 08 Feb 2026 11:43:41 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":"Forbidden"}</pre>
+<h2>INS-008 — Update instruction</h2>
+<p><b>Expected:</b> 200<br>
+<b>Actual:</b> 404<br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X PATCH http://localhost:3001/instructions/ -H 'Content-Type: application/json' -H 'X-Workspace-ID: ' -d '{"content":"Updated instruction text"}'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   192  100   154  100    38   253k  63973 --:--:-- --:--:-- --:--:--  187k
+HTTP/1.1 404 Not Found
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Security-Policy: default-src 'none'
+X-Content-Type-Options: nosniff
+Content-Type: text/html; charset=utf-8
+Content-Length: 154
+Date: Sun, 08 Feb 2026 11:43:41 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot PATCH /instructions/</pre>
+</body>
+</html></pre>
+<h2>INS-009 — Delete instruction</h2>
+<p><b>Expected:</b> 200<br>
+<b>Actual:</b> 404<br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X DELETE http://localhost:3001/instructions/ -H 'X-Workspace-ID: '</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   155  100   155    0     0   293k      0 --:--:-- --:--:-- --:--:--  151k
+HTTP/1.1 404 Not Found
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Security-Policy: default-src 'none'
+X-Content-Type-Options: nosniff
+Content-Type: text/html; charset=utf-8
+Content-Length: 155
+Date: Sun, 08 Feb 2026 11:43:41 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot DELETE /instructions/</pre>
+</body>
+</html></pre>
+<h2>INS-010 — Cross-workspace isolation</h2>
+<p><b>Expected:</b> 403<br>
+<b>Actual:</b> 404<br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X GET http://localhost:3001/instructions/ -H 'X-Workspace-ID: '</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   152  100   152    0     0   290k      0 --:--:-- --:--:-- --:--:--  148k
+HTTP/1.1 404 Not Found
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Security-Policy: default-src 'none'
+X-Content-Type-Options: nosniff
+Content-Type: text/html; charset=utf-8
+Content-Length: 152
+Date: Sun, 08 Feb 2026 11:43:41 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot GET /instructions/</pre>
+</body>
+</html></pre>
+<h2>INS-011 — Link instruction to assistant</h2>
+<p><b>Expected:</b> 200<br>
+<b>Actual:</b> 404<br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/assistants//instructions/ -H 'X-Workspace-ID: '</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   165  100   165    0     0   377k      0 --:--:-- --:--:-- --:--:--  161k
+HTTP/1.1 404 Not Found
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Security-Policy: default-src 'none'
+X-Content-Type-Options: nosniff
+Content-Type: text/html; charset=utf-8
+Content-Length: 165
+Date: Sun, 08 Feb 2026 11:43:41 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /assistants//instructions/</pre>
+</body>
+</html></pre>
+<h2>INS-012 — Link invalid instruction</h2>
+<p><b>Expected:</b> 404<br>
+<b>Actual:</b> 404<br>
+<b>Result:</b> <span style='color:green;font-weight:bold'>PASS</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/assistants//instructions/00000000-0000-0000-0000-000000000000 -H 'X-Workspace-ID: '</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   201  100   201    0     0   408k      0 --:--:-- --:--:-- --:--:--  196k
+HTTP/1.1 404 Not Found
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Security-Policy: default-src 'none'
+X-Content-Type-Options: nosniff
+Content-Type: text/html; charset=utf-8
+Content-Length: 201
+Date: Sun, 08 Feb 2026 11:43:41 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /assistants//instructions/00000000-0000-0000-0000-000000000000</pre>
+</body>
+</html></pre>
+<h2>INS-013 — Link instruction from another workspace</h2>
+<p><b>Expected:</b> 403<br>
+<b>Actual:</b> 404<br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/assistants//instructions/ -H 'X-Workspace-ID: '</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   165  100   165    0     0   320k      0 --:--:-- --:--:-- --:--:--  161k
+HTTP/1.1 404 Not Found
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Security-Policy: default-src 'none'
+X-Content-Type-Options: nosniff
+Content-Type: text/html; charset=utf-8
+Content-Length: 165
+Date: Sun, 08 Feb 2026 11:43:41 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /assistants//instructions/</pre>
+</body>
+</html></pre>
+<h2>INS-014 — AI-refinement engine failure</h2>
+<p><b>Expected:</b> 500<br>
+<b>Actual:</b> 404<br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/instructions//refine -H 'X-Workspace-ID: ' -H 'X-Debug-Fail-AI: true'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   160  100   160    0     0   284k      0 --:--:-- --:--:-- --:--:--  156k
+HTTP/1.1 404 Not Found
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Security-Policy: default-src 'none'
+X-Content-Type-Options: nosniff
+Content-Type: text/html; charset=utf-8
+Content-Length: 160
+Date: Sun, 08 Feb 2026 11:43:41 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /instructions//refine</pre>
+</body>
+</html></pre>
+</body></html>
