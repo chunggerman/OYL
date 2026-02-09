@@ -1,8 +1,15 @@
+// backend/src/api/routes/AssistantRouter.ts
+
 import { Router } from "express";
 import AssistantController from "../AssistantController";
 
 const router = Router();
 const controller = new AssistantController();
+
+/**
+ * Workspace‑scoped assistant routes
+ * All require X-Workspace-ID header
+ */
 
 router.get("/", controller.list);
 router.post("/", controller.create);

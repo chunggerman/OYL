@@ -1,3 +1,5 @@
+// backend/src/domain/repositories/AssistantRepository.ts
+
 import {
   Assistant,
   CreateAssistantInput,
@@ -5,7 +7,7 @@ import {
 } from "../entities/Assistant";
 
 export interface AssistantRepository {
-  list(): Promise<Assistant[]>;
+  listByWorkspace(workspaceId: string): Promise<Assistant[]>;
   create(input: CreateAssistantInput): Promise<Assistant>;
   getById(id: string): Promise<Assistant | null>;
   update(id: string, input: UpdateAssistantInput): Promise<Assistant | null>;

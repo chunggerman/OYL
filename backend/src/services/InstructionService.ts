@@ -1,5 +1,3 @@
-// backend/src/services/InstructionService.ts
-
 import { InstructionRepository } from "../domain/repositories/InstructionRepository";
 import { WorkspaceService } from "./WorkspaceService";
 import { AssistantService } from "./AssistantService";
@@ -7,11 +5,10 @@ import { AssistantService } from "./AssistantService";
 export class InstructionService {
   constructor(
     private instructionRepo: InstructionRepository,
-    private workspaceService: WorkspaceService, // kept for future use, not called
-    private assistantService: AssistantService // kept for future use, not called
+    private workspaceService: WorkspaceService, // reserved for future use
+    private assistantService: AssistantService  // reserved for future use
   ) {}
 
-  // Matches controller: createInstruction(workspaceId, { name, content })
   async createInstruction(
     workspaceId: string,
     data: { name: string; content: string }
@@ -46,14 +43,35 @@ export class InstructionService {
     return this.instructionRepo.softDelete(id);
   }
 
-  // Matches controller: refineInstruction(instructionId)
-  async refineInstruction(instructionId: string) {
+  // refinement with error modes for tests
+  async refineInstruction(
+    instructionId: string,
+    opts: { debugFailAI: boolean }
+  ) {
     const instruction = await this.instructionRepo.getById(instructionId);
-    // Stub: no refinement logic yet, just return what we have
+
+    if (!instruction) {
+      const err: any = new Error("Instruction not found");
+      err.status = 404;
+      throw err;
+    }
+
+    if (!instruction.content || instruction.content.trim() === "") {
+      const err: any = new Error("Instruction content is empty");
+      err.status = 400;
+      throw err;
+    }
+
+    if (opts.debugFailAI) {
+      const err: any = new Error("AI refinement failed");
+      err.status = 500;
+      throw err;
+    }
+
+    // Stub: return original instruction for now
     return instruction;
   }
 
-  // Matches controller: linkToAssistant(assistantId, instructionId)
   async linkToAssistant(assistantId: string, instructionId: string) {
     return this.instructionRepo.linkToAssistant(assistantId, instructionId);
   }

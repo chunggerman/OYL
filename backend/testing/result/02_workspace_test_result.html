@@ -1,23 +1,23 @@
-<html><body><h1>Workspace Test Results</h1><p>Generated: Sat Feb  7 15:24:33 HKT 2026</p>
+<html><body><h1>Workspace Test Results</h1><p>Generated: Sun Feb  8 21:29:32 HKT 2026</p>
 <h2>WSP-001 — Get Workspace A</h2>
 <p><b>Expected:</b> 200<br>
-<b>Actual:</b> 200<br>
-<b>Result:</b> <span style='color:green;font-weight:bold'>PASS</span></p>
+<b>Actual:</b> 403<br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
 <h3>Request</h3><pre>curl -i http://localhost:3001/workspaces/a9485bec-cfa2-4cdc-aec1-e748933a075b -H 'X-Tenant-ID: 80e8a565-2af4-43c7-bdb3-285ae5f9285b'</pre>
 <h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   241  100   241    0     0  26298      0 --:--:-- --:--:-- --:--:-- 26777
-HTTP/1.1 200 OK
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    21  100    21    0     0   2504      0 --:--:-- --:--:-- --:--:--  2625
+HTTP/1.1 403 Forbidden
 X-Powered-By: Express
 Access-Control-Allow-Origin: *
 Content-Type: application/json; charset=utf-8
-Content-Length: 241
-ETag: W/"f1-RlZemcdGlkLSmscmB4Jq1gtgiyo"
-Date: Sat, 07 Feb 2026 07:24:33 GMT
+Content-Length: 21
+ETag: W/"15-TLNzmZqKxaTuFdX/dVWWPBu44/c"
+Date: Sun, 08 Feb 2026 13:29:32 GMT
 Connection: keep-alive
 Keep-Alive: timeout=5
 
-{"id":"a9485bec-cfa2-4cdc-aec1-e748933a075b","tenantId":"80e8a565-2af4-43c7-bdb3-285ae5f9285b","name":"Manual Workspace A","description":"test-A","createdAt":"2026-02-07T07:10:17.599Z","updatedAt":"2026-02-07T07:10:17.599Z","deletedAt":null}</pre>
+{"error":"Forbidden"}</pre>
 <h2>WSP-002 — Get Workspace B</h2>
 <p><b>Expected:</b> 200<br>
 <b>Actual:</b> 200<br>
@@ -25,18 +25,18 @@ Keep-Alive: timeout=5
 <h3>Request</h3><pre>curl -i http://localhost:3001/workspaces/b046191a-72a4-4aec-a854-bf732f9b3297 -H 'X-Tenant-ID: 80e8a565-2af4-43c7-bdb3-285ae5f9285b'</pre>
 <h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   241  100   241    0     0   126k      0 --:--:-- --:--:-- --:--:--  235k
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   249  100   249    0     0   109k      0 --:--:-- --:--:-- --:--:--  121k
 HTTP/1.1 200 OK
 X-Powered-By: Express
 Access-Control-Allow-Origin: *
 Content-Type: application/json; charset=utf-8
-Content-Length: 241
-ETag: W/"f1-BSjkItliShtxa8Frfv2uVaONO6E"
-Date: Sat, 07 Feb 2026 07:24:33 GMT
+Content-Length: 249
+ETag: W/"f9-l3pSMFBU5wjqYC2xuF/dfHGxlwg"
+Date: Sun, 08 Feb 2026 13:29:32 GMT
 Connection: keep-alive
 Keep-Alive: timeout=5
 
-{"id":"b046191a-72a4-4aec-a854-bf732f9b3297","tenantId":"80e8a565-2af4-43c7-bdb3-285ae5f9285b","name":"Manual Workspace B","description":"test-B","createdAt":"2026-02-07T07:10:44.071Z","updatedAt":"2026-02-07T07:10:44.071Z","deletedAt":null}</pre>
+{"id":"b046191a-72a4-4aec-a854-bf732f9b3297","tenantId":"80e8a565-2af4-43c7-bdb3-285ae5f9285b","name":"Manual Workspace B","description":"test-B-updated","createdAt":"2026-02-07T07:10:44.071Z","updatedAt":"2026-02-07T07:24:33.826Z","deletedAt":null}</pre>
 <h2>WSP-003 — Forbidden: Wrong Tenant</h2>
 <p><b>Expected:</b> 403<br>
 <b>Actual:</b> 403<br>
@@ -44,37 +44,37 @@ Keep-Alive: timeout=5
 <h3>Request</h3><pre>curl -i http://localhost:3001/workspaces/a9485bec-cfa2-4cdc-aec1-e748933a075b -H 'X-Tenant-ID: 11111111-1111-1111-1111-111111111111'</pre>
 <h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    21  100    21    0     0  19644      0 --:--:-- --:--:-- --:--:-- 21000
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    21  100    21    0     0  22058      0 --:--:-- --:--:-- --:--:-- 21000
 HTTP/1.1 403 Forbidden
 X-Powered-By: Express
 Access-Control-Allow-Origin: *
 Content-Type: application/json; charset=utf-8
 Content-Length: 21
 ETag: W/"15-TLNzmZqKxaTuFdX/dVWWPBu44/c"
-Date: Sat, 07 Feb 2026 07:24:33 GMT
+Date: Sun, 08 Feb 2026 13:29:32 GMT
 Connection: keep-alive
 Keep-Alive: timeout=5
 
 {"error":"Forbidden"}</pre>
 <h2>WSP-004 — Update Workspace A</h2>
 <p><b>Expected:</b> 200<br>
-<b>Actual:</b> 200<br>
-<b>Result:</b> <span style='color:green;font-weight:bold'>PASS</span></p>
+<b>Actual:</b> 403<br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
 <h3>Request</h3><pre>curl -i -X PATCH http://localhost:3001/workspaces/a9485bec-cfa2-4cdc-aec1-e748933a075b -H 'Content-Type: application/json' -H 'X-Tenant-ID: 80e8a565-2af4-43c7-bdb3-285ae5f9285b' -d '{"name":"Workspace A Updated"}'</pre>
 <h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   272  100   242  100    30  85301  10574 --:--:-- --:--:-- --:--:--  132k
-HTTP/1.1 200 OK
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    51  100    21  100    30  17558  25083 --:--:-- --:--:-- --:--:-- 51000
+HTTP/1.1 403 Forbidden
 X-Powered-By: Express
 Access-Control-Allow-Origin: *
 Content-Type: application/json; charset=utf-8
-Content-Length: 242
-ETag: W/"f2-jN3U5Sr9KPcoX2YbhkXHrNQuB6M"
-Date: Sat, 07 Feb 2026 07:24:33 GMT
+Content-Length: 21
+ETag: W/"15-TLNzmZqKxaTuFdX/dVWWPBu44/c"
+Date: Sun, 08 Feb 2026 13:29:32 GMT
 Connection: keep-alive
 Keep-Alive: timeout=5
 
-{"id":"a9485bec-cfa2-4cdc-aec1-e748933a075b","tenantId":"80e8a565-2af4-43c7-bdb3-285ae5f9285b","name":"Workspace A Updated","description":"test-A","createdAt":"2026-02-07T07:10:17.599Z","updatedAt":"2026-02-07T07:24:33.815Z","deletedAt":null}</pre>
+{"error":"Forbidden"}</pre>
 <h2>WSP-005 — Update Workspace B</h2>
 <p><b>Expected:</b> 200<br>
 <b>Actual:</b> 200<br>
@@ -82,37 +82,37 @@ Keep-Alive: timeout=5
 <h3>Request</h3><pre>curl -i -X PATCH http://localhost:3001/workspaces/b046191a-72a4-4aec-a854-bf732f9b3297 -H 'Content-Type: application/json' -H 'X-Tenant-ID: 80e8a565-2af4-43c7-bdb3-285ae5f9285b' -d '{"description":"test-B-updated"}'</pre>
 <h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   281  100   249  100    32   147k  19382 --:--:-- --:--:-- --:--:--  274k
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   281  100   249  100    32    97k  12866 --:--:-- --:--:-- --:--:--  137k
 HTTP/1.1 200 OK
 X-Powered-By: Express
 Access-Control-Allow-Origin: *
 Content-Type: application/json; charset=utf-8
 Content-Length: 249
-ETag: W/"f9-l3pSMFBU5wjqYC2xuF/dfHGxlwg"
-Date: Sat, 07 Feb 2026 07:24:33 GMT
+ETag: W/"f9-kKjOk0xhMnk2TYfsMxseFin3mr4"
+Date: Sun, 08 Feb 2026 13:29:32 GMT
 Connection: keep-alive
 Keep-Alive: timeout=5
 
-{"id":"b046191a-72a4-4aec-a854-bf732f9b3297","tenantId":"80e8a565-2af4-43c7-bdb3-285ae5f9285b","name":"Manual Workspace B","description":"test-B-updated","createdAt":"2026-02-07T07:10:44.071Z","updatedAt":"2026-02-07T07:24:33.826Z","deletedAt":null}</pre>
+{"id":"b046191a-72a4-4aec-a854-bf732f9b3297","tenantId":"80e8a565-2af4-43c7-bdb3-285ae5f9285b","name":"Manual Workspace B","description":"test-B-updated","createdAt":"2026-02-07T07:10:44.071Z","updatedAt":"2026-02-08T13:29:32.566Z","deletedAt":null}</pre>
 <h2>WSP-006 — Delete Workspace A</h2>
 <p><b>Expected:</b> 200<br>
-<b>Actual:</b> 200<br>
-<b>Result:</b> <span style='color:green;font-weight:bold'>PASS</span></p>
+<b>Actual:</b> 403<br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
 <h3>Request</h3><pre>curl -i -X DELETE http://localhost:3001/workspaces/a9485bec-cfa2-4cdc-aec1-e748933a075b -H 'X-Tenant-ID: 80e8a565-2af4-43c7-bdb3-285ae5f9285b'</pre>
 <h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    16  100    16    0     0  12708      0 --:--:-- --:--:-- --:--:-- 16000
-HTTP/1.1 200 OK
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    21  100    21    0     0  24082      0 --:--:-- --:--:-- --:--:-- 21000
+HTTP/1.1 403 Forbidden
 X-Powered-By: Express
 Access-Control-Allow-Origin: *
 Content-Type: application/json; charset=utf-8
-Content-Length: 16
-ETag: W/"10-sVfJQj54VHOAwj+hmq8RTMGcte8"
-Date: Sat, 07 Feb 2026 07:24:33 GMT
+Content-Length: 21
+ETag: W/"15-TLNzmZqKxaTuFdX/dVWWPBu44/c"
+Date: Sun, 08 Feb 2026 13:29:32 GMT
 Connection: keep-alive
 Keep-Alive: timeout=5
 
-{"deleted":true}</pre>
+{"error":"Forbidden"}</pre>
 <h2>WSP-007 — Verify Workspace A is Soft Deleted</h2>
 <p><b>Expected:</b> 403<br>
 <b>Actual:</b> 403<br>
@@ -120,14 +120,14 @@ Keep-Alive: timeout=5
 <h3>Request</h3><pre>curl -i http://localhost:3001/workspaces/a9485bec-cfa2-4cdc-aec1-e748933a075b -H 'X-Tenant-ID: 80e8a565-2af4-43c7-bdb3-285ae5f9285b'</pre>
 <h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    21  100    21    0     0  25641      0 --:--:-- --:--:-- --:--:-- 21000
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    21  100    21    0     0  24822      0 --:--:-- --:--:-- --:--:-- 21000
 HTTP/1.1 403 Forbidden
 X-Powered-By: Express
 Access-Control-Allow-Origin: *
 Content-Type: application/json; charset=utf-8
 Content-Length: 21
 ETag: W/"15-TLNzmZqKxaTuFdX/dVWWPBu44/c"
-Date: Sat, 07 Feb 2026 07:24:33 GMT
+Date: Sun, 08 Feb 2026 13:29:32 GMT
 Connection: keep-alive
 Keep-Alive: timeout=5
 

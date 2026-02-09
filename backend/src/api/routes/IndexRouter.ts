@@ -1,7 +1,9 @@
-// backend/src/api/routes/IndexRouter.ts
+//backend/src/api/routes/IndexRouter.ts
 
 import { Router } from "express";
 
+import InstructionRouter from "./InstructionRouter";
+import WorkspaceRouter from "./WorkspaceRouter";
 import AssistantRouter from "./AssistantRouter";
 import ChatRouter from "./ChatRouter";
 import ChunkRouter from "./ChunkRouter";
@@ -20,55 +22,25 @@ import SemanticSearchRouter from "./SemanticSearchRouter";
 import TagRouter from "./TagRouter";
 import ThreadRouter from "./ThreadRouter";
 import UserRouter from "./UserRouter";
-import WorkspaceRouter from "./WorkspaceRouter";
 import TenantRouter from "./TenantRouter";
 
-// ------------------------------
-// Instruction module imports
-// ------------------------------
-import InstructionRouter, {
-  bindInstructionController,
-} from "./InstructionRouter";
-
-import InstructionController from "../InstructionController";
-
-// ✅ CORRECT PATH (2 levels up)
-import { PostgresInstructionRepository } from "../../domain/repositories/PostgresInstructionRepository";
-
-import { InstructionService } from "../../services/InstructionService";
-
-import { WorkspaceService } from "../../services/WorkspaceService";
-import { PostgresWorkspaceRepository } from "../../domain/repositories/PostgresWorkspaceRepository";
-
-import { AssistantService } from "../../services/AssistantService";
-import { PostgresAssistantRepository } from "../../domain/repositories/PostgresAssistantRepository";
-
-// ------------------------------
-// Build Instruction module dependencies
-// ------------------------------
-const instructionRepo = new PostgresInstructionRepository();
-const workspaceRepo = new PostgresWorkspaceRepository();
-const assistantRepo = new PostgresAssistantRepository();
-
-const workspaceService = new WorkspaceService(workspaceRepo);
-const assistantService = new AssistantService(assistantRepo);
-
-const instructionService = new InstructionService(
-  instructionRepo,
-  workspaceService,
-  assistantService
-);
-
-const instructionController = new InstructionController(instructionService);
-
-// Bind controller to router
-bindInstructionController(instructionController);
-
-// ------------------------------
-// Main router
-// ------------------------------
 const IndexRouter = Router();
 
+// --------------------------------------------------
+// INSTRUCTION ROUTES FIRST
+// --------------------------------------------------
+IndexRouter.use("/", InstructionRouter);
+
+// --------------------------------------------------
+// ⭐ CRITICAL FIX ⭐
+// WorkspaceRouter MUST be mounted at root
+// so it can handle /tenants/:tenantId/workspaces
+// --------------------------------------------------
+IndexRouter.use("/", WorkspaceRouter);
+
+// --------------------------------------------------
+// Other routers
+// --------------------------------------------------
 IndexRouter.use("/assistants", AssistantRouter);
 IndexRouter.use("/chats", ChatRouter);
 IndexRouter.use("/chunks", ChunkRouter);
@@ -87,13 +59,6 @@ IndexRouter.use("/semantic-search", SemanticSearchRouter);
 IndexRouter.use("/tags", TagRouter);
 IndexRouter.use("/threads", ThreadRouter);
 IndexRouter.use("/users", UserRouter);
-
-// ------------------------------
-// Instruction routes
-// ------------------------------
-IndexRouter.use("/", InstructionRouter);
-
-IndexRouter.use("/workspaces", WorkspaceRouter);
 IndexRouter.use("/tenants", TenantRouter);
 
 export default IndexRouter;

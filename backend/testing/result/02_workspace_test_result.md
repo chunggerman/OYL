@@ -1,10 +1,10 @@
 # Workspace Test Results
-Generated: Sat Feb  7 15:24:33 HKT 2026
+Generated: Sun Feb  8 21:29:32 HKT 2026
 
 ## WSP-001 — Get Workspace A
 **Expected:** 200
-**Actual:** 200
-**Result:** PASS
+**Actual:** 403
+**Result:** FAIL
 
 ### Request
 ```bash
@@ -15,18 +15,18 @@ curl -i http://localhost:3001/workspaces/a9485bec-cfa2-4cdc-aec1-e748933a075b -H
 ```
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   241  100   241    0     0  26298      0 --:--:-- --:--:-- --:--:-- 26777
-HTTP/1.1 200 OK
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    21  100    21    0     0   2504      0 --:--:-- --:--:-- --:--:--  2625
+HTTP/1.1 403 Forbidden
 X-Powered-By: Express
 Access-Control-Allow-Origin: *
 Content-Type: application/json; charset=utf-8
-Content-Length: 241
-ETag: W/"f1-RlZemcdGlkLSmscmB4Jq1gtgiyo"
-Date: Sat, 07 Feb 2026 07:24:33 GMT
+Content-Length: 21
+ETag: W/"15-TLNzmZqKxaTuFdX/dVWWPBu44/c"
+Date: Sun, 08 Feb 2026 13:29:32 GMT
 Connection: keep-alive
 Keep-Alive: timeout=5
 
-{"id":"a9485bec-cfa2-4cdc-aec1-e748933a075b","tenantId":"80e8a565-2af4-43c7-bdb3-285ae5f9285b","name":"Manual Workspace A","description":"test-A","createdAt":"2026-02-07T07:10:17.599Z","updatedAt":"2026-02-07T07:10:17.599Z","deletedAt":null}
+{"error":"Forbidden"}
 ```
 
 ## WSP-002 — Get Workspace B
@@ -43,18 +43,18 @@ curl -i http://localhost:3001/workspaces/b046191a-72a4-4aec-a854-bf732f9b3297 -H
 ```
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   241  100   241    0     0   126k      0 --:--:-- --:--:-- --:--:--  235k
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   249  100   249    0     0   109k      0 --:--:-- --:--:-- --:--:--  121k
 HTTP/1.1 200 OK
 X-Powered-By: Express
 Access-Control-Allow-Origin: *
 Content-Type: application/json; charset=utf-8
-Content-Length: 241
-ETag: W/"f1-BSjkItliShtxa8Frfv2uVaONO6E"
-Date: Sat, 07 Feb 2026 07:24:33 GMT
+Content-Length: 249
+ETag: W/"f9-l3pSMFBU5wjqYC2xuF/dfHGxlwg"
+Date: Sun, 08 Feb 2026 13:29:32 GMT
 Connection: keep-alive
 Keep-Alive: timeout=5
 
-{"id":"b046191a-72a4-4aec-a854-bf732f9b3297","tenantId":"80e8a565-2af4-43c7-bdb3-285ae5f9285b","name":"Manual Workspace B","description":"test-B","createdAt":"2026-02-07T07:10:44.071Z","updatedAt":"2026-02-07T07:10:44.071Z","deletedAt":null}
+{"id":"b046191a-72a4-4aec-a854-bf732f9b3297","tenantId":"80e8a565-2af4-43c7-bdb3-285ae5f9285b","name":"Manual Workspace B","description":"test-B-updated","createdAt":"2026-02-07T07:10:44.071Z","updatedAt":"2026-02-07T07:24:33.826Z","deletedAt":null}
 ```
 
 ## WSP-003 — Forbidden: Wrong Tenant
@@ -71,14 +71,14 @@ curl -i http://localhost:3001/workspaces/a9485bec-cfa2-4cdc-aec1-e748933a075b -H
 ```
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    21  100    21    0     0  19644      0 --:--:-- --:--:-- --:--:-- 21000
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    21  100    21    0     0  22058      0 --:--:-- --:--:-- --:--:-- 21000
 HTTP/1.1 403 Forbidden
 X-Powered-By: Express
 Access-Control-Allow-Origin: *
 Content-Type: application/json; charset=utf-8
 Content-Length: 21
 ETag: W/"15-TLNzmZqKxaTuFdX/dVWWPBu44/c"
-Date: Sat, 07 Feb 2026 07:24:33 GMT
+Date: Sun, 08 Feb 2026 13:29:32 GMT
 Connection: keep-alive
 Keep-Alive: timeout=5
 
@@ -87,8 +87,8 @@ Keep-Alive: timeout=5
 
 ## WSP-004 — Update Workspace A
 **Expected:** 200
-**Actual:** 200
-**Result:** PASS
+**Actual:** 403
+**Result:** FAIL
 
 ### Request
 ```bash
@@ -99,18 +99,18 @@ curl -i -X PATCH http://localhost:3001/workspaces/a9485bec-cfa2-4cdc-aec1-e74893
 ```
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   272  100   242  100    30  85301  10574 --:--:-- --:--:-- --:--:--  132k
-HTTP/1.1 200 OK
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    51  100    21  100    30  17558  25083 --:--:-- --:--:-- --:--:-- 51000
+HTTP/1.1 403 Forbidden
 X-Powered-By: Express
 Access-Control-Allow-Origin: *
 Content-Type: application/json; charset=utf-8
-Content-Length: 242
-ETag: W/"f2-jN3U5Sr9KPcoX2YbhkXHrNQuB6M"
-Date: Sat, 07 Feb 2026 07:24:33 GMT
+Content-Length: 21
+ETag: W/"15-TLNzmZqKxaTuFdX/dVWWPBu44/c"
+Date: Sun, 08 Feb 2026 13:29:32 GMT
 Connection: keep-alive
 Keep-Alive: timeout=5
 
-{"id":"a9485bec-cfa2-4cdc-aec1-e748933a075b","tenantId":"80e8a565-2af4-43c7-bdb3-285ae5f9285b","name":"Workspace A Updated","description":"test-A","createdAt":"2026-02-07T07:10:17.599Z","updatedAt":"2026-02-07T07:24:33.815Z","deletedAt":null}
+{"error":"Forbidden"}
 ```
 
 ## WSP-005 — Update Workspace B
@@ -127,24 +127,24 @@ curl -i -X PATCH http://localhost:3001/workspaces/b046191a-72a4-4aec-a854-bf732f
 ```
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   281  100   249  100    32   147k  19382 --:--:-- --:--:-- --:--:--  274k
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   281  100   249  100    32    97k  12866 --:--:-- --:--:-- --:--:--  137k
 HTTP/1.1 200 OK
 X-Powered-By: Express
 Access-Control-Allow-Origin: *
 Content-Type: application/json; charset=utf-8
 Content-Length: 249
-ETag: W/"f9-l3pSMFBU5wjqYC2xuF/dfHGxlwg"
-Date: Sat, 07 Feb 2026 07:24:33 GMT
+ETag: W/"f9-kKjOk0xhMnk2TYfsMxseFin3mr4"
+Date: Sun, 08 Feb 2026 13:29:32 GMT
 Connection: keep-alive
 Keep-Alive: timeout=5
 
-{"id":"b046191a-72a4-4aec-a854-bf732f9b3297","tenantId":"80e8a565-2af4-43c7-bdb3-285ae5f9285b","name":"Manual Workspace B","description":"test-B-updated","createdAt":"2026-02-07T07:10:44.071Z","updatedAt":"2026-02-07T07:24:33.826Z","deletedAt":null}
+{"id":"b046191a-72a4-4aec-a854-bf732f9b3297","tenantId":"80e8a565-2af4-43c7-bdb3-285ae5f9285b","name":"Manual Workspace B","description":"test-B-updated","createdAt":"2026-02-07T07:10:44.071Z","updatedAt":"2026-02-08T13:29:32.566Z","deletedAt":null}
 ```
 
 ## WSP-006 — Delete Workspace A
 **Expected:** 200
-**Actual:** 200
-**Result:** PASS
+**Actual:** 403
+**Result:** FAIL
 
 ### Request
 ```bash
@@ -155,18 +155,18 @@ curl -i -X DELETE http://localhost:3001/workspaces/a9485bec-cfa2-4cdc-aec1-e7489
 ```
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    16  100    16    0     0  12708      0 --:--:-- --:--:-- --:--:-- 16000
-HTTP/1.1 200 OK
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    21  100    21    0     0  24082      0 --:--:-- --:--:-- --:--:-- 21000
+HTTP/1.1 403 Forbidden
 X-Powered-By: Express
 Access-Control-Allow-Origin: *
 Content-Type: application/json; charset=utf-8
-Content-Length: 16
-ETag: W/"10-sVfJQj54VHOAwj+hmq8RTMGcte8"
-Date: Sat, 07 Feb 2026 07:24:33 GMT
+Content-Length: 21
+ETag: W/"15-TLNzmZqKxaTuFdX/dVWWPBu44/c"
+Date: Sun, 08 Feb 2026 13:29:32 GMT
 Connection: keep-alive
 Keep-Alive: timeout=5
 
-{"deleted":true}
+{"error":"Forbidden"}
 ```
 
 ## WSP-007 — Verify Workspace A is Soft Deleted
@@ -183,14 +183,14 @@ curl -i http://localhost:3001/workspaces/a9485bec-cfa2-4cdc-aec1-e748933a075b -H
 ```
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    21  100    21    0     0  25641      0 --:--:-- --:--:-- --:--:-- 21000
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    21  100    21    0     0  24822      0 --:--:-- --:--:-- --:--:-- 21000
 HTTP/1.1 403 Forbidden
 X-Powered-By: Express
 Access-Control-Allow-Origin: *
 Content-Type: application/json; charset=utf-8
 Content-Length: 21
 ETag: W/"15-TLNzmZqKxaTuFdX/dVWWPBu44/c"
-Date: Sat, 07 Feb 2026 07:24:33 GMT
+Date: Sun, 08 Feb 2026 13:29:32 GMT
 Connection: keep-alive
 Keep-Alive: timeout=5
 

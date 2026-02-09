@@ -1,3 +1,5 @@
+// backend/src/services/AssistantService.ts
+
 import {
   Assistant,
   CreateAssistantInput,
@@ -8,8 +10,8 @@ import { AssistantRepository } from "../domain/repositories/AssistantRepository"
 export class AssistantService {
   constructor(private readonly repo: AssistantRepository) {}
 
-  list(): Promise<Assistant[]> {
-    return this.repo.list();
+  list(workspaceId: string): Promise<Assistant[]> {
+    return this.repo.listByWorkspace(workspaceId);
   }
 
   create(input: CreateAssistantInput): Promise<Assistant> {

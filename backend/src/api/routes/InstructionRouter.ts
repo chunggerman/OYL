@@ -4,60 +4,52 @@ import { Router } from "express";
 import InstructionController from "../InstructionController";
 
 const router = Router();
+const controller = new InstructionController();
 
-// Controller instance will be injected in server.ts or IndexRouter
-let controller: InstructionController | null = null;
+/**
+ * Workspace‑scoped instruction routes
+ */
 
-// Allow late binding (same pattern as some modular routers)
-export const bindInstructionController = (c: InstructionController) => {
-  controller = c;
-};
-
-// ------------------------------
-// Workspace‑scoped routes
-// ------------------------------
+// Create instruction
 router.post(
   "/workspaces/:workspaceId/instructions",
-  (req, res) => controller!.create(req, res)
+  controller.create
 );
 
+// List instructions by workspace  ⭐ FIX FOR INS‑007
 router.get(
   "/workspaces/:workspaceId/instructions",
-  (req, res) => controller!.listByWorkspace(req, res)
+  controller.listByWorkspace
 );
 
-// ------------------------------
-// Instruction‑scoped routes
-// ------------------------------
+// Get instruction
 router.get(
-  "/instructions/:instructionId",
-  (req, res) => controller!.getById(req, res)
+  "/instructions/:id",
+  controller.get
 );
 
+// Update instruction
 router.patch(
-  "/instructions/:instructionId",
-  (req, res) => controller!.update(req, res)
+  "/instructions/:id",
+  controller.update
 );
 
+// Delete instruction
 router.delete(
-  "/instructions/:instructionId",
-  (req, res) => controller!.delete(req, res)
+  "/instructions/:id",
+  controller.delete
 );
 
-// ------------------------------
-// AI refine
-// ------------------------------
+// Refine instruction (AI)
 router.post(
-  "/instructions/:instructionId/refine",
-  (req, res) => controller!.refine(req, res)
+  "/instructions/:id/refine",
+  controller.refine
 );
 
-// ------------------------------
-// Assistant linking
-// ------------------------------
+// Link instruction to assistant
 router.post(
   "/assistants/:assistantId/instructions/:instructionId",
-  (req, res) => controller!.linkToAssistant(req, res)
+  controller.linkToAssistant
 );
 
 export default router;
