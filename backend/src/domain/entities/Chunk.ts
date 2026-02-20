@@ -1,22 +1,29 @@
+//backend/src/domain/entities/Chunk.ts
+
 export interface Chunk {
   id: string;
-  datasourceId: string;
-  content: string;
-  embedding: number[];
-  metadata: any | null;
+  documentId: string;
+  position: number;
+  text: string;
+  length: number;
+  overlap: number;
+  hash: string | null;
+  metadata: any;
   createdAt: Date;
-  updatedAt: Date;
+  deletedAt: Date | null;
 }
 
 export interface CreateChunkInput {
-  datasourceId: string;
-  content: string;
-  embedding: number[];
-  metadata?: any | null;
+  documentId: string;
+  position: number;
+  text: string;
+  length: number;
+  overlap: number;
+  hash?: string | null;
+  metadata?: any;
 }
 
 export interface UpdateChunkInput {
-  content?: string;
-  embedding?: number[];
-  metadata?: any | null;
+  text?: string;
+  metadata?: any;
 }

@@ -1,118 +1,69 @@
+//backend/src/domain/repositories/PostgresChunkRepository.ts
+
 import { pool } from "../../db";
 import {
   Chunk,
   CreateChunkInput,
   UpdateChunkInput,
 } from "../entities/Chunk";
-import { ChunkRepository } from "./ChunkRepository";
 
-export class PostgresChunkRepository implements ChunkRepository {
-
-  /**
-   * Private Mappers
-   */
+export class PostgresChunkRepository {
   private mapRow(row: any): Chunk {
     return {
       id: row.id,
-      datasourceId: row.datasource_id,
-      content: row.content,
-      embedding: row.embedding,
+      documentId: row.document_id,
+      position: row.position,
+      text: row.text,
+      length: row.length,
+      overlap: row.overlap,
+      hash: row.hash,
       metadata: row.metadata,
       createdAt: row.created_at,
-      updatedAt: row.updated_at,
+      deletedAt: row.deleted_at,
     };
   }
 
-  /**
-   * Public Repository Methods
-   */
-  async list(): Promise<Chunk[]> {
+  async listByDocument(documentId: string): Promise<Chunk[]> {
     const result = await pool.query(
-      "SELECT * FROM chunks ORDER BY created_at DESC"
-    );
-    return result.rows.map((r) => this.mapRow(r));
-  }
-
-  async listByDatasource(datasourceId: string): Promise<Chunk[]> {
-    const result = await pool.query(
-      "SELECT * FROM chunks WHERE datasource_id = $1 ORDER BY created_at DESC",
-      [datasourceId]
+      `
+      SELECT *
+      FROM chunks
+      WHERE document_id = $1 AND deleted_at IS NULL
+      ORDER BY position ASC
+      `,
+      [documentId]
     );
     return result.rows.map((r) => this.mapRow(r));
   }
 
   async create(input: CreateChunkInput): Promise<Chunk> {
     const result = await pool.query(
-      "INSERT INTO chunks (datasource_id, content, embedding, metadata) VALUES ($1, $2, $3, $4) RETURNING *",
+      `
+      INSERT INTO chunks (id, document_id, position, text, length, overlap, hash, metadata)
+      VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7)
+      RETURNING *
+      `,
       [
-        input.datasourceId,
-        input.content,
-        input.embedding,
-        input.metadata ?? null,
+        input.documentId,
+        input.position,
+        input.text,
+        input.length,
+        input.overlap,
+        input.hash ?? null,
+        input.metadata ?? {},
       ]
     );
     return this.mapRow(result.rows[0]);
   }
 
-  async get(id: string): Promise<Chunk | null> {
-    const result = await pool.query(
-      "SELECT * FROM chunks WHERE id = $1",
-      [id]
-    );
-
-    if (result.rows.length === 0) return null;
-    return this.mapRow(result.rows[0]);
-  }
-
-  async getById(id: string) {
-    return this.get(id);
-  }
-
-  async update(id: string, input: UpdateChunkInput): Promise<Chunk | null> {
-    const fields: string[] = [];
-    const values: any[] = [];
-    let idx = 1;
-
-    // Logic: Dynamically build field list for update
-    if (input.content !== undefined) {
-      fields.push(`content = $${idx}`);
-      values.push(input.content);
-      idx++;
-    }
-
-    if (input.embedding !== undefined) {
-      fields.push(`embedding = $${idx}`);
-      values.push(input.embedding);
-      idx++;
-    }
-
-    if (input.metadata !== undefined) {
-      fields.push(`metadata = $${idx}`);
-      values.push(input.metadata);
-      idx++;
-    }
-
-    if (fields.length === 0) {
-      return this.get(id);
-    }
-
-    // Add ID as the final parameter for the WHERE clause
-    values.push(id);
-
-    const query = `
+  async deleteByDocument(documentId: string): Promise<void> {
+    await pool.query(
+      `
       UPDATE chunks
-      SET ${fields.join(", ")}, updated_at = NOW()
-      WHERE id = $${idx}
-      RETURNING *
-    `;
-
-    const result = await pool.query(query, values);
-
-    if (result.rows.length === 0) return null;
-    return this.mapRow(result.rows[0]);
-  }
-
-  async delete(id: string): Promise<void> {
-    await pool.query("DELETE FROM chunks WHERE id = $1", [id]);
+      SET deleted_at = NOW()
+      WHERE document_id = $1
+      `,
+      [documentId]
+    );
   }
 }

@@ -1,3 +1,5 @@
+//backend/src/services/ChunkService.ts
+
 import { PostgresChunkRepository } from "../domain/repositories/PostgresChunkRepository";
 
 export class ChunkService {
@@ -7,27 +9,15 @@ export class ChunkService {
     this.repo = repo;
   }
 
-  list() {
-    return this.repo.list();
+  listByDocument(documentId: string) {
+    return this.repo.listByDocument(documentId);
   }
 
-  listByDatasource(datasourceId: string) {
-    return this.repo.listByDatasource(datasourceId);
+  create(input: any) {
+    return this.repo.create(input);
   }
 
-  create(data: any) {
-    return this.repo.create(data);
-  }
-
-  get(id: string) {
-    return this.repo.get(id);
-  }
-
-  update(id: string, data: any) {
-    return this.repo.update(id, data);
-  }
-
-  delete(id: string) {
-    return this.repo.delete(id);
+  deleteByDocument(documentId: string) {
+    return this.repo.deleteByDocument(documentId);
   }
 }

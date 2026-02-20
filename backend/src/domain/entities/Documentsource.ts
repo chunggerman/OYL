@@ -1,8 +1,11 @@
-export interface Documentsource {
+//backend/src/domain/entities/Documentsource.ts
+
+export interface DocumentSource {
   id: string;
-  name: string;
-  type: string;
-  config: any | null;
-  created_at: Date;
-  updated_at: Date;
+  workspaceId: string;
+  filename: string;
+  mimetype: string;
+  size: number;
+  storagePath: string;
+  createdAt: Date;
 }

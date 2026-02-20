@@ -1,3 +1,5 @@
+//backend/src/domain/repositories/ChunkRepository.ts
+
 import {
   Chunk,
   CreateChunkInput,

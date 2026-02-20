@@ -1,10 +1,10 @@
+//backend/src/domain/entities/Document.ts
+
 export interface Document {
   id: string;
   workspaceId: string;
-  referenceId: string | null;
-  title: string;
-  content: string | null;
+  documentSourceId: string;
+  status: "pending" | "processing" | "completed" | "failed";
+  metadata: Record<string, any> | null;
   createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
 }

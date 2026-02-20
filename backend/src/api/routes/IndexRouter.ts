@@ -1,4 +1,4 @@
-//backend/src/api/routes/IndexRouter.ts
+// backend/src/api/routes/IndexRouter.ts
 
 import { Router } from "express";
 
@@ -9,7 +9,7 @@ import ChatRouter from "./ChatRouter";
 import ChunkRouter from "./ChunkRouter";
 import ConfigRouter from "./ConfigRouter";
 import DatasourceRouter from "./DatasourceRouter";
-import DocumentsourceRouter from "./DocumentsourceRouter";
+import DocumentSourceRouter from "./DocumentSourceRouter";
 import EmbeddingRouter from "./EmbeddingRouter";
 import FileUploadRouter from "./FileUploadRouter";
 import HealthRouter from "./HealthRouter";
@@ -24,19 +24,33 @@ import ThreadRouter from "./ThreadRouter";
 import UserRouter from "./UserRouter";
 import TenantRouter from "./TenantRouter";
 
+import { documentRouter } from "./DocumentRouter";
+import DocumentChunkRouter from "./DocumentChunkRouter";
+
 const IndexRouter = Router();
 
 // --------------------------------------------------
-// INSTRUCTION ROUTES FIRST
+// Instruction routes
 // --------------------------------------------------
 IndexRouter.use("/", InstructionRouter);
 
 // --------------------------------------------------
-// ⭐ CRITICAL FIX ⭐
-// WorkspaceRouter MUST be mounted at root
-// so it can handle /tenants/:tenantId/workspaces
+// FIX: mount chunking router with a UNIQUE prefix
 // --------------------------------------------------
-IndexRouter.use("/", WorkspaceRouter);
+IndexRouter.use(
+  "/workspaces/:workspaceId/documents/chunking",
+  DocumentChunkRouter
+);
+
+// --------------------------------------------------
+// Workspace routes
+// --------------------------------------------------
+IndexRouter.use("/workspaces", WorkspaceRouter);
+
+// --------------------------------------------------
+// Document upload & listing
+// --------------------------------------------------
+IndexRouter.use("/", documentRouter);
 
 // --------------------------------------------------
 // Other routers
@@ -46,7 +60,7 @@ IndexRouter.use("/chats", ChatRouter);
 IndexRouter.use("/chunks", ChunkRouter);
 IndexRouter.use("/configs", ConfigRouter);
 IndexRouter.use("/datasources", DatasourceRouter);
-IndexRouter.use("/documentsource", DocumentsourceRouter);
+IndexRouter.use("/documentsource", DocumentSourceRouter);
 IndexRouter.use("/embeddings", EmbeddingRouter);
 IndexRouter.use("/files", FileUploadRouter);
 IndexRouter.use("/health", HealthRouter);

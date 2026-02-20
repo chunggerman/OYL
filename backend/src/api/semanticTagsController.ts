@@ -1,3 +1,5 @@
+//backend/src/api/semanticTagsController.ts
+
 import { pool } from "../db";
 
 export async function getSemanticTagsByChunk(req, res) {

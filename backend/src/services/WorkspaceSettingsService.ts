@@ -1,3 +1,5 @@
+//backend/src/services/WorkspaceSettingsService.ts
+
 import { WorkspaceSettingsRepository } from "../domain/repositories/WorkspaceSettingsRepository";
 
 export class WorkspaceSettingsService {

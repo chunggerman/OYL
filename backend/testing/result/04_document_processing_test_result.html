@@ -1,0 +1,219 @@
+<html><body><h1>Document Processing Test Results</h1><p>Generated: Tue Feb 10 12:47:21 HKT 2026</p>
+<h2>DOC-000 — Upload valid document</h2>
+<p><b>Expected:</b> 201<br>
+<b>Actual:</b> 201<br>
+<b>Result:</b> <span style='color:green;font-weight:bold'>PASS</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/workspaces/a9485bec-cfa2-4cdc-aec1-e748933a075b/documents/upload -H 'X-Workspace-ID: a9485bec-cfa2-4cdc-aec1-e748933a075b' -F 'file=@./backend/testing/sample/firefighting_and_rescue.pdf'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100 2178k  100   550  100 2178k   151k   599M --:--:-- --:--:-- --:--:--  709M
+HTTP/1.1 100 Continue
+
+HTTP/1.1 201 Created
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 550
+ETag: W/"226-MCfGaLYef57tIfQGG5Ewma/HCNc"
+Date: Tue, 10 Feb 2026 04:47:21 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"documentSource":{"id":"0bbb26e0-cb54-4a43-beeb-368c86a90a37","workspaceId":"a9485bec-cfa2-4cdc-aec1-e748933a075b","filename":"firefighting_and_rescue.pdf","mimetype":"application/pdf","size":2230137,"storagePath":"storage/documents/29fa2507a8e0da2d216ef8bf0102a7ac","createdAt":"2026-02-10T04:47:21.038Z"},"document":{"id":"037c9f8e-a901-4aa7-99d7-99836545a547","workspaceId":"a9485bec-cfa2-4cdc-aec1-e748933a075b","documentSourceId":"0bbb26e0-cb54-4a43-beeb-368c86a90a37","status":"pending","metadata":null,"createdAt":"2026-02-10T04:47:21.038Z"}}</pre>
+<h2>DOC-001 — Unsupported file type</h2>
+<p><b>Expected:</b> 400<br>
+<b>Actual:</b> 400<br>
+<b>Result:</b> <span style='color:green;font-weight:bold'>PASS</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/workspaces/a9485bec-cfa2-4cdc-aec1-e748933a075b/documents/upload -H 'X-Workspace-ID: a9485bec-cfa2-4cdc-aec1-e748933a075b' -F 'file=@./backend/testing/sample/virus.exe'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   246  100    33  100   213  51401   323k --:--:-- --:--:-- --:--:--  240k
+HTTP/1.1 400 Bad Request
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 33
+ETag: W/"21-8w+YHMRSEh6Yg0iDbhAoTG6ZlNw"
+Date: Tue, 10 Feb 2026 04:47:21 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":"Unsupported file type"}</pre>
+<h2>DOC-002 — Missing file field</h2>
+<p><b>Expected:</b> 400<br>
+<b>Actual:</b> 400<br>
+<b>Result:</b> <span style='color:green;font-weight:bold'>PASS</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/workspaces/a9485bec-cfa2-4cdc-aec1-e748933a075b/documents/upload -H 'X-Workspace-ID: a9485bec-cfa2-4cdc-aec1-e748933a075b'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    24  100    24    0     0  40747      0 --:--:-- --:--:-- --:--:-- 24000
+HTTP/1.1 400 Bad Request
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 24
+ETag: W/"18-BDOUm/u25p528HZwUx8iSCqC9D0"
+Date: Tue, 10 Feb 2026 04:47:21 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":"Missing file"}</pre>
+<h2>DOC-003 — Empty filename (debug simulation)</h2>
+<p><b>Expected:</b> 400<br>
+<b>Actual:</b> 201<br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/workspaces/a9485bec-cfa2-4cdc-aec1-e748933a075b/documents/upload -H 'X-Workspace-ID: a9485bec-cfa2-4cdc-aec1-e748933a075b' -H 'X-Debug-Empty-Filename: true' -F 'file=@./backend/testing/sample/firefighting_and_rescue.pdf'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100 2178k  100   550  100 2178k   188k   747M --:--:-- --:--:-- --:--:-- 1063M
+HTTP/1.1 100 Continue
+
+HTTP/1.1 201 Created
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 550
+ETag: W/"226-bDiiEsFePcdzp5K7XAhAE7+6puM"
+Date: Tue, 10 Feb 2026 04:47:21 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"documentSource":{"id":"9daa91ff-edb1-47a1-9158-2cbd2ced7fe2","workspaceId":"a9485bec-cfa2-4cdc-aec1-e748933a075b","filename":"firefighting_and_rescue.pdf","mimetype":"application/pdf","size":2230137,"storagePath":"storage/documents/63c771defe80a79a3281c3b4e383c3e9","createdAt":"2026-02-10T04:47:21.070Z"},"document":{"id":"45145fad-7c80-496f-8ca8-4fb2476c6cfc","workspaceId":"a9485bec-cfa2-4cdc-aec1-e748933a075b","documentSourceId":"9daa91ff-edb1-47a1-9158-2cbd2ced7fe2","status":"pending","metadata":null,"createdAt":"2026-02-10T04:47:21.070Z"}}</pre>
+<h2>DOC-004 — File too large</h2>
+<p><b>Expected:</b> 413<br>
+<b>Actual:</b> 413<br>
+<b>Result:</b> <span style='color:green;font-weight:bold'>PASS</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/workspaces/a9485bec-cfa2-4cdc-aec1-e748933a075b/documents/upload -H 'X-Workspace-ID: a9485bec-cfa2-4cdc-aec1-e748933a075b' -H 'X-Debug-Fake-Size: 999999999' -F 'file=@./backend/testing/sample/firefighting_and_rescue.pdf'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0 26 2178k  100    21   26  576k  37974  1017M --:--:-- --:--:-- --:--:--  562M
+HTTP/1.1 100 Continue
+
+HTTP/1.1 413 Payload Too Large
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 21
+ETag: W/"15-dkIR5DMiE4DFiFyy0l7UhXGSuiA"
+Date: Tue, 10 Feb 2026 04:47:21 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":"Too large"}</pre>
+<h2>DOC-005 — Ingestion job creation failure</h2>
+<p><b>Expected:</b> 500<br>
+<b>Actual:</b> 500<br>
+<b>Result:</b> <span style='color:green;font-weight:bold'>PASS</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/workspaces/a9485bec-cfa2-4cdc-aec1-e748933a075b/documents/upload -H 'X-Workspace-ID: a9485bec-cfa2-4cdc-aec1-e748933a075b' -H 'X-Debug-Fail-Ingestion: true' -F 'file=@./backend/testing/sample/firefighting_and_rescue.pdf'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100 2178k  100    28  100 2178k  15029  1141M --:--:-- --:--:-- --:--:-- 2127M
+HTTP/1.1 100 Continue
+
+HTTP/1.1 500 Internal Server Error
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 28
+ETag: W/"1c-P33fI41ToM0L4aEJeKBrsODR0pk"
+Date: Tue, 10 Feb 2026 04:47:21 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":"Ingestion failed"}</pre>
+<h2>DOC-006 — Retrieve document metadata</h2>
+<p><b>Expected:</b> 200<br>
+<b>Actual:</b> 200<br>
+<b>Result:</b> <span style='color:green;font-weight:bold'>PASS</span></p>
+<h3>Request</h3><pre>curl -i -X GET http://localhost:3001/documents/e87af3f4-c2d8-4605-a96e-2a4796164fe6 -H 'X-Workspace-ID: a9485bec-cfa2-4cdc-aec1-e748933a075b'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   340  100   340    0     0   252k      0 --:--:-- --:--:-- --:--:--  332k
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 340
+ETag: W/"154-beGWnCLrlU8CyRiQE10k75WmhDY"
+Date: Tue, 10 Feb 2026 04:47:21 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"id":"e87af3f4-c2d8-4605-a96e-2a4796164fe6","workspace_id":"a9485bec-cfa2-4cdc-aec1-e748933a075b","reference_id":null,"title":null,"content":null,"created_at":"2026-02-10T04:47:21.015Z","updated_at":"2026-02-10T04:47:21.021Z","deleted_at":null,"document_source_id":"66dc3039-62e0-49d3-899c-8b84f4f98a52","status":"pending","metadata":null}</pre>
+<h2>DOC-007 — List documents</h2>
+<p><b>Expected:</b> 200<br>
+<b>Actual:</b> 200<br>
+<b>Result:</b> <span style='color:green;font-weight:bold'>PASS</span></p>
+<h3>Request</h3><pre>curl -i -X GET http://localhost:3001/workspaces/a9485bec-cfa2-4cdc-aec1-e748933a075b/documents -H 'X-Workspace-ID: a9485bec-cfa2-4cdc-aec1-e748933a075b'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100  5457  100  5457    0     0  4646k      0 --:--:-- --:--:-- --:--:-- 5329k
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 5457
+ETag: W/"1551-KIdf20JCAezWOe8oGBHZElwJOfw"
+Date: Tue, 10 Feb 2026 04:47:21 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+[{"id":"45145fad-7c80-496f-8ca8-4fb2476c6cfc","workspace_id":"a9485bec-cfa2-4cdc-aec1-e748933a075b","reference_id":null,"title":null,"content":null,"created_at":"2026-02-10T04:47:21.070Z","updated_at":"2026-02-10T04:47:21.071Z","deleted_at":null,"document_source_id":"9daa91ff-edb1-47a1-9158-2cbd2ced7fe2","status":"pending","metadata":null},{"id":"037c9f8e-a901-4aa7-99d7-99836545a547","workspace_id":"a9485bec-cfa2-4cdc-aec1-e748933a075b","reference_id":null,"title":null,"content":null,"created_at":"2026-02-10T04:47:21.038Z","updated_at":"2026-02-10T04:47:21.038Z","deleted_at":null,"document_source_id":"0bbb26e0-cb54-4a43-beeb-368c86a90a37","status":"pending","metadata":null},{"id":"e87af3f4-c2d8-4605-a96e-2a4796164fe6","workspace_id":"a9485bec-cfa2-4cdc-aec1-e748933a075b","reference_id":null,"title":null,"content":null,"created_at":"2026-02-10T04:47:21.015Z","updated_at":"2026-02-10T04:47:21.021Z","deleted_at":null,"document_source_id":"66dc3039-62e0-49d3-899c-8b84f4f98a52","status":"pending","metadata":null},{"id":"df70ea67-7861-488b-9893-164e0bbe92a2","workspace_id":"a9485bec-cfa2-4cdc-aec1-e748933a075b","reference_id":null,"title":null,"content":null,"created_at":"2026-02-10T04:42:20.663Z","updated_at":"2026-02-10T04:42:20.663Z","deleted_at":null,"document_source_id":"56352c7f-2721-49ab-885c-5b5579bd8ad7","status":"pending","metadata":null},{"id":"821fc32d-e746-4707-8b34-f09e3287ace4","workspace_id":"a9485bec-cfa2-4cdc-aec1-e748933a075b","reference_id":null,"title":null,"content":null,"created_at":"2026-02-10T04:42:20.629Z","updated_at":"2026-02-10T04:42:20.635Z","deleted_at":null,"document_source_id":"bb1ff10d-e880-4b2a-83e7-84b8d5b18118","status":"pending","metadata":null},{"id":"f9707c28-274f-4082-a964-d13ee1002610","workspace_id":"a9485bec-cfa2-4cdc-aec1-e748933a075b","reference_id":null,"title":null,"content":null,"created_at":"2026-02-10T04:41:42.764Z","updated_at":"2026-02-10T04:41:42.764Z","deleted_at":null,"document_source_id":"d56ff2b9-c6e4-4f92-b070-d78105f736b8","status":"pending","metadata":null},{"id":"1d28172a-06f2-4fa8-a8c9-c5b50b1465e1","workspace_id":"a9485bec-cfa2-4cdc-aec1-e748933a075b","reference_id":null,"title":null,"content":null,"created_at":"2026-02-10T04:41:42.722Z","updated_at":"2026-02-10T04:41:42.729Z","deleted_at":null,"document_source_id":"04eb99c1-23d9-422a-89f8-d94c2d15217b","status":"pending","metadata":null},{"id":"1c23c275-a196-424f-ba5a-dcd5c2f545b7","workspace_id":"a9485bec-cfa2-4cdc-aec1-e748933a075b","reference_id":null,"title":null,"content":null,"created_at":"2026-02-10T04:39:32.286Z","updated_at":"2026-02-10T04:39:32.286Z","deleted_at":null,"document_source_id":"516ccb2d-77f9-422b-ac42-e495cc838335","status":"pending","metadata":null},{"id":"b7035dfa-bce7-4e8a-b029-e14e71e4d67e","workspace_id":"a9485bec-cfa2-4cdc-aec1-e748933a075b","reference_id":null,"title":null,"content":null,"created_at":"2026-02-10T04:37:12.391Z","updated_at":"2026-02-10T04:37:12.392Z","deleted_at":null,"document_source_id":"8a99f2e8-9010-4654-a5fa-3b8851c7fc77","status":"pending","metadata":null},{"id":"90c42bcd-0ba6-42e6-b46f-8565306c3f8b","workspace_id":"a9485bec-cfa2-4cdc-aec1-e748933a075b","reference_id":null,"title":null,"content":null,"created_at":"2026-02-10T04:35:37.106Z","updated_at":"2026-02-10T04:35:37.106Z","deleted_at":null,"document_source_id":"7a3eca96-f3b5-4af8-9f27-498b924b175e","status":"pending","metadata":null},{"id":"d5227db2-a4fe-43a6-a5d9-02857947d6e5","workspace_id":"a9485bec-cfa2-4cdc-aec1-e748933a075b","reference_id":null,"title":null,"content":null,"created_at":"2026-02-10T04:32:34.325Z","updated_at":"2026-02-10T04:32:34.326Z","deleted_at":null,"document_source_id":"704a74b9-a060-4a39-a67f-5a94c8ff0641","status":"pending","metadata":null},{"id":"fc5daa4f-f03e-4462-8695-40fe494b734d","workspace_id":"a9485bec-cfa2-4cdc-aec1-e748933a075b","reference_id":null,"title":null,"content":null,"created_at":"2026-02-09T22:58:00.368Z","updated_at":"2026-02-09T22:58:00.368Z","deleted_at":null,"document_source_id":"b409f211-d58e-4260-924c-431a88560420","status":"pending","metadata":null},{"id":"62f0bd51-058c-4484-8229-ab78e729c005","workspace_id":"a9485bec-cfa2-4cdc-aec1-e748933a075b","reference_id":null,"title":null,"content":null,"created_at":"2026-02-09T22:58:00.356Z","updated_at":"2026-02-09T22:58:00.356Z","deleted_at":null,"document_source_id":"8c5b9819-4e92-4689-b74d-709fe84a5526","status":"pending","metadata":null},{"id":"d6927d25-df67-4241-8c32-7b7be450b33c","workspace_id":"a9485bec-cfa2-4cdc-aec1-e748933a075b","reference_id":null,"title":null,"content":null,"created_at":"2026-02-09T22:58:00.315Z","updated_at":"2026-02-09T22:58:00.315Z","deleted_at":null,"document_source_id":"d7c46e9f-80d4-44be-bf60-8589c50dbb33","status":"pending","metadata":null},{"id":"962229a7-c90d-4bc0-8367-6b2f3b9294f0","workspace_id":"a9485bec-cfa2-4cdc-aec1-e748933a075b","reference_id":null,"title":null,"content":null,"created_at":"2026-02-09T22:57:08.909Z","updated_at":"2026-02-09T22:57:08.923Z","deleted_at":null,"document_source_id":"ca792a0a-f6e3-43e0-8beb-e67e26ebd945","status":"pending","metadata":null},{"id":"8505b64f-5080-4f61-8205-633a189a5291","workspace_id":"a9485bec-cfa2-4cdc-aec1-e748933a075b","reference_id":null,"title":null,"content":null,"created_at":"2026-02-09T22:55:59.332Z","updated_at":"2026-02-09T22:55:59.344Z","deleted_at":null,"document_source_id":"b9548c91-c52a-4ca2-b906-0a0670a365ef","status":"pending","metadata":null}]</pre>
+<h2>DOC-008 — Cross-workspace isolation</h2>
+<p><b>Expected:</b> 403<br>
+<b>Actual:</b> 403<br>
+<b>Result:</b> <span style='color:green;font-weight:bold'>PASS</span></p>
+<h3>Request</h3><pre>curl -i -X GET http://localhost:3001/documents/e87af3f4-c2d8-4605-a96e-2a4796164fe6 -H 'X-Workspace-ID: b046191a-72a4-4aec-a854-bf732f9b3297'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    21  100    21    0     0  28301      0 --:--:-- --:--:-- --:--:-- 21000
+HTTP/1.1 403 Forbidden
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 21
+ETag: W/"15-TLNzmZqKxaTuFdX/dVWWPBu44/c"
+Date: Tue, 10 Feb 2026 04:47:21 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":"Forbidden"}</pre>
+<h2>DOC-009 — Delete document</h2>
+<p><b>Expected:</b> 200<br>
+<b>Actual:</b> 200<br>
+<b>Result:</b> <span style='color:green;font-weight:bold'>PASS</span></p>
+<h3>Request</h3><pre>curl -i -X DELETE http://localhost:3001/documents/e87af3f4-c2d8-4605-a96e-2a4796164fe6 -H 'X-Workspace-ID: a9485bec-cfa2-4cdc-aec1-e748933a075b'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    16  100    16    0     0   9184      0 --:--:-- --:--:-- --:--:-- 16000
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 16
+ETag: W/"10-sVfJQj54VHOAwj+hmq8RTMGcte8"
+Date: Tue, 10 Feb 2026 04:47:21 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"deleted":true}</pre>
+<h2>DOC-010 — Delete document from another workspace</h2>
+<p><b>Expected:</b> 403<br>
+<b>Actual:</b> 403<br>
+<b>Result:</b> <span style='color:green;font-weight:bold'>PASS</span></p>
+<h3>Request</h3><pre>curl -i -X DELETE http://localhost:3001/documents/e87af3f4-c2d8-4605-a96e-2a4796164fe6 -H 'X-Workspace-ID: b046191a-72a4-4aec-a854-bf732f9b3297'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    21  100    21    0     0  28965      0 --:--:-- --:--:-- --:--:-- 21000
+HTTP/1.1 403 Forbidden
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 21
+ETag: W/"15-TLNzmZqKxaTuFdX/dVWWPBu44/c"
+Date: Tue, 10 Feb 2026 04:47:21 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":"Forbidden"}</pre>
+</body></html>

@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 //import { DocumentSourceService } from "../services/DocumentsourceService";
 //import { PostgresDocumentSourceRepository } from "../domain/repositories/PostgresDocumentsourceRepository";
-import { DocumentsourceService } from "../services/DocumentsourceService";
-import { PostgresDocumentsourceRepository } from "../domain/repositories/PostgresDocumentsourceRepository";
+import { DocumentsourceService } from "../services/DocumentSourceService";
+import { PostgresDocumentsourceRepository } from "../domain/repositories/PostgresDocumentSourceRepository";
 const service = new DocumentsourceService(new PostgresDocumentsourceRepository());
 
 export default class DocumentsourceController {

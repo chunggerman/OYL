@@ -1,14 +1,12 @@
+// backend/src/api/routes/DocumentChunkRouter.ts
+
 import { Router } from "express";
-import ChunkController from "../ChunkController";
+import DocumentChunkController from "../DocumentChunkController";
 
 const router = Router();
-const controller = new ChunkController();
+const controller = new DocumentChunkController();
 
-router.get("/", controller.list.bind(controller));
-router.get("/datasource/:datasourceId", controller.listByDatasource.bind(controller));
-router.post("/", controller.create.bind(controller));
-router.get("/:id", controller.get.bind(controller));
-router.put("/:id", controller.update.bind(controller));
-router.delete("/:id", controller.delete.bind(controller));
+router.post("/:documentId/chunk", controller.chunkDocument);
+router.get("/:documentId/chunks", controller.listChunks);
 
 export default router;

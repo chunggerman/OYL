@@ -1,9 +1,11 @@
+//backend/src/domain/repositories/PostgresIngestionRepository.ts
+
 import { pool } from "../../db";
 import {
   Ingestion,
   CreateIngestionInput,
   UpdateIngestionStatusInput,
-} from "../entities/Ingestion";
+} from "../entities/IngestionJob";
 import { IngestionRepository } from "./IngestionRepository";
 
 export class PostgresIngestionRepository implements IngestionRepository {

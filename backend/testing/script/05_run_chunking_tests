@@ -1,0 +1,145 @@
+#!/bin/sh
+
+BASE_URL="http://localhost:3001"
+
+WORKSPACE_A_ID="260a6009-e449-4cc7-b9ee-b5b21439cc34"
+WORKSPACE_B_ID="d9c7c13c-157f-4d8b-9e64-e5f2a90f1835"
+
+OUTPUT_MD="./backend/testing/result/05_chunking_test_result.md"
+OUTPUT_HTML="./backend/testing/result/05_chunking_test_result.html"
+
+mkdir -p ./backend/testing/result
+
+###############################################
+# Expected status mapping
+###############################################
+expected_status() {
+  case "$1" in
+    CHK-000) echo 201 ;;  # valid chunk
+    CHK-001) echo 400 ;;  # empty content
+    CHK-002) echo 201 ;;  # long content
+    CHK-003) echo 409 ;;  # already chunked
+    CHK-004) echo 404 ;;  # non-existent doc
+    CHK-005) echo 403 ;;  # wrong workspace
+    CHK-006) echo 200 ;;  # list chunks
+    CHK-007) echo 404 ;;  # list non-existent
+    CHK-008) echo 403 ;;  # list wrong workspace
+    CHK-009) echo 500 ;;  # forced fail
+    CHK-010) echo 200 ;;  # metadata check
+    CHK-011) echo 200 ;;  # deterministic
+    CHK-012) echo 201 ;;  # re-chunk after delete
+    CHK-013) echo 201 ;;  # binary doc
+    CHK-014) echo 201 ;;  # mixed-language
+  esac
+}
+
+###############################################
+# Output headers
+###############################################
+echo "# Chunking Test Results" > "$OUTPUT_MD"
+echo "Generated: $(date)\n" >> "$OUTPUT_MD"
+
+echo "<html><body><h1>Chunking Test Results</h1><p>Generated: $(date)</p>" > "$OUTPUT_HTML"
+
+###############################################
+# Helper: run test
+###############################################
+run_test() {
+  ID="$1"
+  NAME="$2"
+  CMD="$3"
+
+  EXPECTED=$(expected_status "$ID")
+  RESPONSE=$(eval "$CMD" 2>&1)
+  STATUS=$(echo "$RESPONSE" | grep "HTTP" | tail -1 | awk '{print $2}')
+
+  if [ "$STATUS" = "$EXPECTED" ]; then
+    RESULT="PASS"
+    RESULT_HTML="<span style='color:green;font-weight:bold'>PASS</span>"
+  else
+    RESULT="FAIL"
+    RESULT_HTML="<span style='color:red;font-weight:bold'>FAIL</span>"
+  fi
+
+  echo "## $ID — $NAME" >> "$OUTPUT_MD"
+  echo "**Expected:** $EXPECTED" >> "$OUTPUT_MD"
+  echo "**Actual:** $STATUS" >> "$OUTPUT_MD"
+  echo "**Result:** $RESULT" >> "$OUTPUT_MD"
+  echo "\n### Request\n\`\`\`bash\n$CMD\n\`\`\`" >> "$OUTPUT_MD"
+  echo "\n### Response\n\`\`\`\n$RESPONSE\n\`\`\`\n" >> "$OUTPUT_MD"
+
+  echo "<h2>$ID — $NAME</h2>" >> "$OUTPUT_HTML"
+  echo "<p><b>Expected:</b> $EXPECTED<br>" >> "$OUTPUT_HTML"
+  echo "<b>Actual:</b> $STATUS<br>" >> "$OUTPUT_HTML"
+  echo "<b>Result:</b> $RESULT_HTML</p>" >> "$OUTPUT_HTML"
+  echo "<h3>Request</h3><pre>$CMD</pre>" >> "$OUTPUT_HTML"
+  echo "<h3>Response</h3><pre>$RESPONSE</pre>" >> "$OUTPUT_HTML"
+}
+
+###############################################
+# BOOTSTRAP: upload a document
+###############################################
+# BOOTSTRAP_UPLOAD=$(curl -s -i -X POST $BASE_URL/workspaces/$WORKSPACE_A_ID/documents/upload \
+#  -H "X-Workspace-ID: $WORKSPACE_A_ID" \
+#  -F "file=@./backend/testing/sample/firefighting_and_rescue.pdf")
+#
+# DOCUMENT_ID=$(echo "$BOOTSTRAP_UPLOAD" | grep '"id"' | head -1 | sed 's/.*"id":"\([^"]*\)".*/\1/')
+DOCUMENT_ID="eb8728f4-94ef-40bd-a2e4-efa1c1b50c0d"
+
+###############################################
+# TESTS (correct chunking routes)
+###############################################
+
+run_test "CHK-000" "Chunk valid document" \
+"curl -i -X POST $BASE_URL/workspaces/$WORKSPACE_A_ID/documents/chunking/$DOCUMENT_ID/chunk -H 'X-Workspace-ID: $WORKSPACE_A_ID'"
+
+run_test "CHK-001" "Chunk empty document" \
+"curl -i -X POST $BASE_URL/workspaces/$WORKSPACE_A_ID/documents/chunking/$DOCUMENT_ID/chunk -H 'X-Workspace-ID: $WORKSPACE_A_ID' -H 'X-Debug-Empty-Content: true'"
+
+run_test "CHK-002" "Chunk extremely long document" \
+"curl -i -X POST $BASE_URL/workspaces/$WORKSPACE_A_ID/documents/chunking/$DOCUMENT_ID/chunk -H 'X-Workspace-ID: $WORKSPACE_A_ID' -H 'X-Debug-Long-Content: true'"
+
+run_test "CHK-003" "Re-chunking same document" \
+"curl -i -X POST $BASE_URL/workspaces/$WORKSPACE_A_ID/documents/chunking/$DOCUMENT_ID/chunk -H 'X-Workspace-ID: $WORKSPACE_A_ID'"
+
+run_test "CHK-004" "Chunk non-existent document" \
+"curl -i -X POST $BASE_URL/workspaces/$WORKSPACE_A_ID/documents/chunking/00000000-0000-0000-0000-000000000000/chunk -H 'X-Workspace-ID: $WORKSPACE_A_ID'"
+
+run_test "CHK-005" "Chunk document from another workspace" \
+"curl -i -X POST $BASE_URL/workspaces/$WORKSPACE_B_ID/documents/chunking/$DOCUMENT_ID/chunk -H 'X-Workspace-ID: $WORKSPACE_B_ID'"
+
+run_test "CHK-006" "Retrieve chunks" \
+"curl -i -X GET $BASE_URL/workspaces/$WORKSPACE_A_ID/documents/chunking/$DOCUMENT_ID/chunks -H 'X-Workspace-ID: $WORKSPACE_A_ID'"
+
+run_test "CHK-007" "Retrieve chunks for non-existent document" \
+"curl -i -X GET $BASE_URL/workspaces/$WORKSPACE_A_ID/documents/chunking/00000000-0000-0000-0000-000000000000/chunks -H 'X-Workspace-ID: $WORKSPACE_A_ID'"
+
+run_test "CHK-008" "Retrieve chunks from another workspace" \
+"curl -i -X GET $BASE_URL/workspaces/$WORKSPACE_B_ID/documents/chunking/$DOCUMENT_ID/chunks -H 'X-Workspace-ID: $WORKSPACE_B_ID'"
+
+run_test "CHK-009" "Internal chunking failure" \
+"curl -i -X POST $BASE_URL/workspaces/$WORKSPACE_A_ID/documents/chunking/$DOCUMENT_ID/chunk -H 'X-Workspace-ID: $WORKSPACE_A_ID' -H 'X-Debug-Fail-Chunking: true'"
+
+run_test "CHK-010" "Chunk metadata correctness" \
+"curl -i -X GET $BASE_URL/workspaces/$WORKSPACE_A_ID/documents/chunking/$DOCUMENT_ID/chunks -H 'X-Workspace-ID: $WORKSPACE_A_ID'"
+
+run_test "CHK-011" "Deterministic chunking" \
+"curl -i -X GET $BASE_URL/workspaces/$WORKSPACE_A_ID/documents/chunking/$DOCUMENT_ID/chunks -H 'X-Workspace-ID: $WORKSPACE_A_ID'"
+
+run_test "CHK-012" "Chunking idempotency after deletion" \
+"curl -i -X POST $BASE_URL/workspaces/$WORKSPACE_A_ID/documents/chunking/$DOCUMENT_ID/chunk -H 'X-Workspace-ID: $WORKSPACE_A_ID' -H 'X-Debug-Delete-Chunks: true'"
+
+run_test "CHK-013" "Chunk large binary document" \
+"curl -i -X POST $BASE_URL/workspaces/$WORKSPACE_A_ID/documents/chunking/$DOCUMENT_ID/chunk -H 'X-Workspace-ID: $WORKSPACE_A_ID' -H 'X-Debug-Binary: true'"
+
+run_test "CHK-014" "Chunk mixed-language document" \
+"curl -i -X POST $BASE_URL/workspaces/$WORKSPACE_A_ID/documents/chunking/$DOCUMENT_ID/chunk -H 'X-Workspace-ID: $WORKSPACE_A_ID' -H 'X-Debug-Mixed-Language: true'"
+
+###############################################
+# Close HTML
+###############################################
+echo "</body></html>" >> "$OUTPUT_HTML"
+
+echo "Done."
+echo "Markdown report saved to: $OUTPUT_MD"
+echo "HTML report saved to: $OUTPUT_HTML"

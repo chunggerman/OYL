@@ -1,8 +1,10 @@
+//backend/src/domain/repositories/IngestionRepository.ts
+
 import {
   Ingestion,
   CreateIngestionInput,
   UpdateIngestionStatusInput,
-} from "../entities/Ingestion";
+} from "../entities/IngestionJob";
 
 export interface IngestionRepository {
   listByDatasource(datasourceId: string): Promise<Ingestion[]>;

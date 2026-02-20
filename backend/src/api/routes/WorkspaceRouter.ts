@@ -18,7 +18,7 @@ const workspaceTenantIsolation = async (
   next: NextFunction
 ) => {
   const headerTenantId = req.header("X-Tenant-ID");
-  const workspaceId = req.params.id;
+  const workspaceId = req.params.workspaceId || req.params.id;
 
   if (!headerTenantId) {
     return res.status(403).json({ error: "Forbidden" });
@@ -49,5 +49,8 @@ router.get("/:id", workspaceTenantIsolation, controller.getById);
 router.post("/", controller.create);
 router.patch("/:id", workspaceTenantIsolation, controller.update);
 router.delete("/:id", workspaceTenantIsolation, controller.delete);
+
+// Prevent WorkspaceRouter from swallowing deeper nested routes
+router.use("/:id/*", (req, _res, next) => next("route"));
 
 export default router;

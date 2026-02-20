@@ -1,5 +1,7 @@
+//backend/src/services/DocumentSourceService.ts
+
 //import { PostgresDocumentsourceRepository } from "../domain/repositories/PostgresDocumentsourceRepository";
-import { PostgresDocumentsourceRepository } from "../domain/repositories/PostgresDocumentsourceRepository"
+import { PostgresDocumentsourceRepository } from "../domain/repositories/PostgresDocumentSourceRepository"
 export class DocumentsourceService {
   private repo: PostgresDocumentsourceRepository;
 

@@ -1,8 +1,10 @@
+//backend/src/services/IngestionService.ts
+
 import {
   Ingestion,
   CreateIngestionInput,
   UpdateIngestionStatusInput,
-} from "../domain/entities/Ingestion";
+} from "../domain/entities/IngestionJob";
 import { IngestionRepository } from "../domain/repositories/IngestionRepository";
 
 export class IngestionService {

@@ -1,13 +1,44 @@
+// backend/src/api/routes/DocumentRouter.ts
+
 import { Router } from "express";
-import DocumentController from "../DocumentController";
+import multer from "multer";
 
-const router = Router();
-const controller = new DocumentController();
+import { DocumentController } from "../DocumentController";
+import { DocumentService } from "../../services/DocumentService";
+import { PostgresDocumentRepository } from "../../domain/repositories/PostgresDocumentRepository";
 
-router.get("/", controller.list);
-router.post("/", controller.create);
-router.get("/:id", controller.get);
-router.put("/:id", controller.update);
-router.delete("/:id", controller.delete);
+const upload = multer({
+  dest: "storage/documents/",
+  limits: { fileSize: 20 * 1024 * 1024 },
+});
 
-export default router;
+const repo = new PostgresDocumentRepository();
+const service = new DocumentService(repo);
+const controller = new DocumentController(service);
+
+export const documentRouter = Router();
+
+// Upload
+documentRouter.post(
+  "/workspaces/:workspaceId/documents/upload",
+  upload.single("file"),
+  controller.upload
+);
+
+// List
+documentRouter.get(
+  "/workspaces/:workspaceId/documents",
+  controller.listDocuments
+);
+
+// REAL FIX: prevent DocumentRouter from swallowing chunking routes
+documentRouter.use((req, res, next) => {
+  if (req.path.match(/^\/workspaces\/[^/]+\/documents\/chunking\//)) {
+    return next("router"); // <-- this exits DocumentRouter entirely
+  }
+  next();
+});
+
+// Single document
+documentRouter.get("/documents/:documentId", controller.getDocument);
+documentRouter.delete("/documents/:documentId", controller.deleteDocument);

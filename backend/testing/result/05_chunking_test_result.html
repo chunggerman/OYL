@@ -1,0 +1,137 @@
+<html><body><h1>Chunking Test Results</h1><p>Generated: Fri Feb 20 11:23:31 HKT 2026</p>
+<h2>CHK-000 — Chunk valid document</h2>
+<p><b>Expected:</b> 201<br>
+<b>Actual:</b> <br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/workspaces/260a6009-e449-4cc7-b9ee-b5b21439cc34/documents/chunking/eb8728f4-94ef-40bd-a2e4-efa1c1b50c0d/chunk -H 'X-Workspace-ID: 260a6009-e449-4cc7-b9ee-b5b21439cc34'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:03 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:05 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:06 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:07 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:08 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:09 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:10 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:11 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:12 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:13 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:13 --:--:--     0
+curl: (52) Empty reply from server</pre>
+<h2>CHK-001 — Chunk empty document</h2>
+<p><b>Expected:</b> 400<br>
+<b>Actual:</b> <br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/workspaces/260a6009-e449-4cc7-b9ee-b5b21439cc34/documents/chunking/eb8728f4-94ef-40bd-a2e4-efa1c1b50c0d/chunk -H 'X-Workspace-ID: 260a6009-e449-4cc7-b9ee-b5b21439cc34' -H 'X-Debug-Empty-Content: true'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 3001 after 0 ms: Couldn't connect to server</pre>
+<h2>CHK-002 — Chunk extremely long document</h2>
+<p><b>Expected:</b> 201<br>
+<b>Actual:</b> <br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/workspaces/260a6009-e449-4cc7-b9ee-b5b21439cc34/documents/chunking/eb8728f4-94ef-40bd-a2e4-efa1c1b50c0d/chunk -H 'X-Workspace-ID: 260a6009-e449-4cc7-b9ee-b5b21439cc34' -H 'X-Debug-Long-Content: true'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 3001 after 0 ms: Couldn't connect to server</pre>
+<h2>CHK-003 — Re-chunking same document</h2>
+<p><b>Expected:</b> 409<br>
+<b>Actual:</b> <br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/workspaces/260a6009-e449-4cc7-b9ee-b5b21439cc34/documents/chunking/eb8728f4-94ef-40bd-a2e4-efa1c1b50c0d/chunk -H 'X-Workspace-ID: 260a6009-e449-4cc7-b9ee-b5b21439cc34'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 3001 after 0 ms: Couldn't connect to server</pre>
+<h2>CHK-004 — Chunk non-existent document</h2>
+<p><b>Expected:</b> 404<br>
+<b>Actual:</b> <br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/workspaces/260a6009-e449-4cc7-b9ee-b5b21439cc34/documents/chunking/00000000-0000-0000-0000-000000000000/chunk -H 'X-Workspace-ID: 260a6009-e449-4cc7-b9ee-b5b21439cc34'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 3001 after 0 ms: Couldn't connect to server</pre>
+<h2>CHK-005 — Chunk document from another workspace</h2>
+<p><b>Expected:</b> 403<br>
+<b>Actual:</b> <br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/workspaces/d9c7c13c-157f-4d8b-9e64-e5f2a90f1835/documents/chunking/eb8728f4-94ef-40bd-a2e4-efa1c1b50c0d/chunk -H 'X-Workspace-ID: d9c7c13c-157f-4d8b-9e64-e5f2a90f1835'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 3001 after 0 ms: Couldn't connect to server</pre>
+<h2>CHK-006 — Retrieve chunks</h2>
+<p><b>Expected:</b> 200<br>
+<b>Actual:</b> <br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X GET http://localhost:3001/workspaces/260a6009-e449-4cc7-b9ee-b5b21439cc34/documents/chunking/eb8728f4-94ef-40bd-a2e4-efa1c1b50c0d/chunks -H 'X-Workspace-ID: 260a6009-e449-4cc7-b9ee-b5b21439cc34'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 3001 after 0 ms: Couldn't connect to server</pre>
+<h2>CHK-007 — Retrieve chunks for non-existent document</h2>
+<p><b>Expected:</b> 404<br>
+<b>Actual:</b> <br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X GET http://localhost:3001/workspaces/260a6009-e449-4cc7-b9ee-b5b21439cc34/documents/chunking/00000000-0000-0000-0000-000000000000/chunks -H 'X-Workspace-ID: 260a6009-e449-4cc7-b9ee-b5b21439cc34'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 3001 after 0 ms: Couldn't connect to server</pre>
+<h2>CHK-008 — Retrieve chunks from another workspace</h2>
+<p><b>Expected:</b> 403<br>
+<b>Actual:</b> <br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X GET http://localhost:3001/workspaces/d9c7c13c-157f-4d8b-9e64-e5f2a90f1835/documents/chunking/eb8728f4-94ef-40bd-a2e4-efa1c1b50c0d/chunks -H 'X-Workspace-ID: d9c7c13c-157f-4d8b-9e64-e5f2a90f1835'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 3001 after 0 ms: Couldn't connect to server</pre>
+<h2>CHK-009 — Internal chunking failure</h2>
+<p><b>Expected:</b> 500<br>
+<b>Actual:</b> <br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/workspaces/260a6009-e449-4cc7-b9ee-b5b21439cc34/documents/chunking/eb8728f4-94ef-40bd-a2e4-efa1c1b50c0d/chunk -H 'X-Workspace-ID: 260a6009-e449-4cc7-b9ee-b5b21439cc34' -H 'X-Debug-Fail-Chunking: true'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 3001 after 0 ms: Couldn't connect to server</pre>
+<h2>CHK-010 — Chunk metadata correctness</h2>
+<p><b>Expected:</b> 200<br>
+<b>Actual:</b> <br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X GET http://localhost:3001/workspaces/260a6009-e449-4cc7-b9ee-b5b21439cc34/documents/chunking/eb8728f4-94ef-40bd-a2e4-efa1c1b50c0d/chunks -H 'X-Workspace-ID: 260a6009-e449-4cc7-b9ee-b5b21439cc34'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 3001 after 0 ms: Couldn't connect to server</pre>
+<h2>CHK-011 — Deterministic chunking</h2>
+<p><b>Expected:</b> 200<br>
+<b>Actual:</b> <br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X GET http://localhost:3001/workspaces/260a6009-e449-4cc7-b9ee-b5b21439cc34/documents/chunking/eb8728f4-94ef-40bd-a2e4-efa1c1b50c0d/chunks -H 'X-Workspace-ID: 260a6009-e449-4cc7-b9ee-b5b21439cc34'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 3001 after 0 ms: Couldn't connect to server</pre>
+<h2>CHK-012 — Chunking idempotency after deletion</h2>
+<p><b>Expected:</b> 201<br>
+<b>Actual:</b> <br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/workspaces/260a6009-e449-4cc7-b9ee-b5b21439cc34/documents/chunking/eb8728f4-94ef-40bd-a2e4-efa1c1b50c0d/chunk -H 'X-Workspace-ID: 260a6009-e449-4cc7-b9ee-b5b21439cc34' -H 'X-Debug-Delete-Chunks: true'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 3001 after 0 ms: Couldn't connect to server</pre>
+<h2>CHK-013 — Chunk large binary document</h2>
+<p><b>Expected:</b> 201<br>
+<b>Actual:</b> <br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/workspaces/260a6009-e449-4cc7-b9ee-b5b21439cc34/documents/chunking/eb8728f4-94ef-40bd-a2e4-efa1c1b50c0d/chunk -H 'X-Workspace-ID: 260a6009-e449-4cc7-b9ee-b5b21439cc34' -H 'X-Debug-Binary: true'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 3001 after 0 ms: Couldn't connect to server</pre>
+<h2>CHK-014 — Chunk mixed-language document</h2>
+<p><b>Expected:</b> 201<br>
+<b>Actual:</b> <br>
+<b>Result:</b> <span style='color:red;font-weight:bold'>FAIL</span></p>
+<h3>Request</h3><pre>curl -i -X POST http://localhost:3001/workspaces/260a6009-e449-4cc7-b9ee-b5b21439cc34/documents/chunking/eb8728f4-94ef-40bd-a2e4-efa1c1b50c0d/chunk -H 'X-Workspace-ID: 260a6009-e449-4cc7-b9ee-b5b21439cc34' -H 'X-Debug-Mixed-Language: true'</pre>
+<h3>Response</h3><pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 3001 after 0 ms: Couldn't connect to server</pre>
+</body></html>
